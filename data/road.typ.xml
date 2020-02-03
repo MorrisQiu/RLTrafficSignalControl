@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<types xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/types_file.xsd">
+    <type id="60KM.2lane" priority="60" numLanes="2" speed="16.667" />
+    <type id="60KM.1lane" priority="60" numLanes="1" speed="16.667" />
+    <type id="50KM.1lane" priority="50" numLanes="1" speed="13.889" />
+</types>
