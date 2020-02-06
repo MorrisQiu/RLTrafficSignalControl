@@ -22,6 +22,7 @@ else:
 
 from sumolib import checkBinary  # noqa
 import traci  # noqa
+import traci.constants as tc
 
 
 def generate_routefile():
@@ -65,22 +66,36 @@ guiShape="passenger"/>
 # The program looks like this
 #    <tlLogic id="tl0" type="static" programID="0" offset="0">
 # the locations of the tls are      NESW
-#        <phase duration="31" state="GrGr"/>
-#        <phase duration="21"  state="yryr"/>
-#        <phase duration="31" state="rGrG"/>
-#        <phase duration="21"  state="ryry"/>
+#        <phase duration="41" state="GGrrGGrr"/>
+#        <phase duration="4" state="yyrryyrr"/>
+#        <phase duration="41" state="rrGGrrGG"/>
+#        <phase duration="4" state="rryyrryy"/>
 #    </tlLogic>
 
 
 def run():
     """execute the TraCI control loop"""
-    step = 0
+#    step = 0
     # we start with phase 2 where EW has green
-    for i in range(20):
-#    traci.trafficlight.setPhase("tl0", 2)
+   
+    traci.junction.subscribeContext("tl0", tc.CMD_GET_VEHICLE_VARIABLE, 300, [tc.VAR_SPEED, tc.VAR_WAITING_TIME]) 
+    print(traci.junction.getContextSubscriptionResults("tl0"))
+#   traci.trafficlight.setPhase("tl0", 2)
 #    while traci.lane.getLastStepVehicleNumber("0W-0_0") <200:
 #   while traci.simulation.getMinExpectedNumber() > 0:        
+    for step in range(300):
+        print("step ", step)
+        print( traci.simulation.getDeltaT(), "from last step")
+        print("# of vechiles in and to come: ", traci.simulation.getMinExpectedNumber())
+        print("Traffic Light is in phase ", traci.trafficlight.getPhase("tl0"),
+              "which is as ", traci.trafficlight.getRedYellowGreenState("tl0"),
+              "with duration of ", traci.trafficlight.getPhaseDuration("tl0"),
+              "The next phase will start at timestep", traci.trafficlight.getNextSwitch("tl0"),"secends")
         traci.simulationStep()
+        print(traci.edge.getLastStepVehicleNumber("0W-0"),"veichles are in eastbound approaching the TL",
+              "and the # of veichles in waiting are ", traci.edge.getLastStepHaltingNumber("0W-0"),
+              "Eastbound total waiting time is ", traci.edge.getWaitingTime("0W-0"))
+        print(traci.junction.getContextSubscriptionResults("tl0"))
 #    if traci.trafficlight.getPhase("tl0") == 2:
             # we are not already switching
 #           if traci.inductionloop.getLastStepVehicleNumber("tl0") > 0:
@@ -89,10 +104,10 @@ def run():
 #           else:
                 # otherwise try to keep green for EW
 #               traci.trafficlight.setPhase("tl0", 2)
-        eb = traci.lane.getLastStepVehicleNumber("0W-0_0")
-        step += 1
-        print("Step "+ str(step))
-        print('Eastbound vechicles : ', eb)
+#        eb = traci.lane.getLastStepVehicleNumber("0W-0_0")
+#        step += 1
+#        print("Step "+ str(step))
+#        print('Eastbound vechicles : ', eb)
     traci.close()
     sys.stdout.flush()
 
