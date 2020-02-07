@@ -1,12 +1,11 @@
 from pprint import pprint as pp
 import numpy as np
 import itertools
+import random
 
 # tls = traci.trafficlight
 # tl_list = tls.getIDList()
-
 # logic = tls.getCompleteRedYellowGreenDefinition('tl0')[1]
-
 # logic.phases
 
 
@@ -20,8 +19,7 @@ class ConflictMatrix:
             self.matrix = np.array(matrix)
 
     def test_conflict(self, phase_state):
-        # TODO
-        pass
+        return has_conflict(phase_state, self)
 
 
 cm1 = [
@@ -72,40 +70,27 @@ def PhaseMask(phase_state):
     return mask
 
 
-print(phase_state)
-print(conf_1.matrix)
+def has_conflict(phase_state, conf_matx=conf_1):
 
-
-def has_conflict(phase_state, conf_1matrix=cm1):
-
-    hadamard = np.multiply(PhaseMask(phase_state), conf_1matrix.matrix)
+    hadamard = np.multiply(PhaseMask(phase_state), conf_matx.matrix)
 
     # print(hadamard)
 
     return not np.all(hadamard == 0)
 
 
-print(has_conflict(phase_state, conf_1))
-
-
-def get_matrices(elements, N):
-
+def get_action_space(elements, N):
     result = []
     for permutation in itertools.product(elements, repeat=N):
         result.append(array_to_state(list(permutation)))
-    # rows = itertools.combinations_with_replacement(elements, N)
-    # result = itertools.combinations_with_replacement(rows, N)
-    # print(result)
     print(f'Number of possible permutations: {len(result)}')
     return result
 
 
-full_action_space = get_matrices([0, 1, 2, 3], 8)
+full_action_space = get_action_space([0, 1, 2, 3], 8)
 
 action_space = [state for state
                 in full_action_space if
                 not has_conflict(state, conf_1)]
 
 print(f'Permutations without conflict: {len(action_space)}')
-
-# action_space = dict(zip(range(len(action_space)), action_space))

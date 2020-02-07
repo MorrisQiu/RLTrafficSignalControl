@@ -77,12 +77,12 @@ def run():
     """execute the TraCI control loop"""
 #    step = 0
     # we start with phase 2 where EW has green
-   
-    traci.junction.subscribeContext("tl0", tc.CMD_GET_VEHICLE_VARIABLE, 300, [tc.VAR_SPEED, tc.VAR_WAITING_TIME]) 
+
+    traci.junction.subscribeContext("tl0", tc.CMD_GET_VEHICLE_VARIABLE, 300, [tc.VAR_SPEED, tc.VAR_WAITING_TIME])
     print(traci.junction.getContextSubscriptionResults("tl0"))
 #   traci.trafficlight.setPhase("tl0", 2)
 #    while traci.lane.getLastStepVehicleNumber("0W-0_0") <200:
-#   while traci.simulation.getMinExpectedNumber() > 0:        
+#   while traci.simulation.getMinExpectedNumber() > 0:
     for step in range(300):
         print("step ", step)
         print( traci.simulation.getDeltaT(), "from last step")
@@ -108,8 +108,8 @@ def run():
 #        step += 1
 #        print("Step "+ str(step))
 #        print('Eastbound vechicles : ', eb)
-    traci.close()
-    sys.stdout.flush()
+    # traci.close()
+    # sys.stdout.flush()
 
 
 def get_options():
