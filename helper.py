@@ -79,7 +79,7 @@ def has_conflict(phase_state, conf_matx=conf_1):
     return not np.all(hadamard == 0)
 
 
-def get_action_space(elements, N):
+def get_actions(elements, N):
     result = []
     for permutation in itertools.product(elements, repeat=N):
         result.append(array_to_state(list(permutation)))
@@ -87,10 +87,10 @@ def get_action_space(elements, N):
     return result
 
 
-full_action_space = get_action_space([0, 1, 2, 3], 8)
+all_actions = get_actions([0, 1, 2, 3], 8)
 
-action_space = [state for state
-                in full_action_space if
+actions = [state for state
+                in all_actions if
                 not has_conflict(state, conf_1)]
 
-print(f'Permutations without conflict: {len(action_space)}')
+print(f'Permutations without conflict: {len(actions)}')
