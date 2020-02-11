@@ -94,3 +94,13 @@ actions = [state for state
                 not has_conflict(state, conf_1)]
 
 print(f'Permutations without conflict: {len(actions)}')
+
+
+from time import sleep
+
+def check_conflicts(action_space):
+    for i in range(len(action_space)):
+        state = action_space[i]
+        print(state, end='')
+        print(f' has conflict: {has_conflict(state, conf_1)}')
+        sleep(0.2)
