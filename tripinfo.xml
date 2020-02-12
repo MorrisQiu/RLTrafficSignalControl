@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 02/08/20 15:50:13 by Eclipse SUMO GUI Version 1.4.0
+<!-- generated on 02/11/20 15:07:51 by Eclipse SUMO GUI Version 1.4.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
@@ -23,7 +23,7 @@
     </report>
 
     <traci_server>
-        <remote-port value="58001"/>
+        <remote-port value="59548"/>
     </traci_server>
 
 </configuration>
@@ -89,4 +89,10 @@
     <tripinfo id="WestBound_58" depart="218.00" departLane="E-0E_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="269.00" arrivalLane="0W-W_0" arrivalPos="10.00" arrivalSpeed="16.58" duration="51.00" routeLength="615.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="13.33" rerouteNo="0" devices="tripinfo_WestBound_58" vType="typeWE" speedFactor="1.02" vaporized=""/>
     <tripinfo id="EastBound_60" depart="227.00" departLane="W-0W_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="278.00" arrivalLane="0E-E_0" arrivalPos="10.00" arrivalSpeed="16.34" duration="51.00" routeLength="615.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="13.97" rerouteNo="0" devices="tripinfo_EastBound_60" vType="typeWE" speedFactor="1.08" vaporized=""/>
     <tripinfo id="WestBound_61" depart="232.00" departLane="E-0E_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="283.00" arrivalLane="0W-W_0" arrivalPos="10.00" arrivalSpeed="16.62" duration="51.00" routeLength="615.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="13.27" rerouteNo="0" devices="tripinfo_WestBound_61" vType="typeWE" speedFactor="1.12" vaporized=""/>
-</tripinfos>
+    <tripinfo id="SouthBound_54" depart="206.00" departLane="N-0N_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="302.00" arrivalLane="0S-S_0" arrivalPos="10.00" arrivalSpeed="16.32" duration="96.00" routeLength="613.10" waitingTime="30.00" waitingCount="1" stopTime="0.00" timeLoss="58.92" rerouteNo="0" devices="tripinfo_SouthBound_54" vType="typeNS" speedFactor="1.00" vaporized=""/>
+    <tripinfo id="NorthBound_55" depart="212.00" departLane="S-0S_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="302.00" arrivalLane="0N-N_0" arrivalPos="10.00" arrivalSpeed="16.25" duration="90.00" routeLength="613.10" waitingTime="25.00" waitingCount="1" stopTime="0.00" timeLoss="52.24" rerouteNo="0" devices="tripinfo_NorthBound_55" vType="typeNS" speedFactor="1.00" vaporized=""/>
+    <tripinfo id="NorthBound_65" depart="248.00" departLane="S-0S_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="303.00" arrivalLane="0N-N_1" arrivalPos="10.00" arrivalSpeed="14.69" duration="55.00" routeLength="613.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="12.67" rerouteNo="0" devices="tripinfo_NorthBound_65" vType="typeNS" speedFactor="0.88" vaporized=""/>
+    <tripinfo id="SouthBound_59" depart="220.00" departLane="N-0N_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="304.00" arrivalLane="0S-S_1" arrivalPos="10.00" arrivalSpeed="15.97" duration="84.00" routeLength="613.10" waitingTime="15.00" waitingCount="1" stopTime="0.00" timeLoss="45.84" rerouteNo="0" devices="tripinfo_SouthBound_59" vType="typeNS" speedFactor="0.97" vaporized=""/>
+    <tripinfo id="SouthBound_63" depart="241.00" departLane="N-0N_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="304.00" arrivalLane="0S-S_0" arrivalPos="10.00" arrivalSpeed="16.14" duration="63.00" routeLength="613.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="25.05" rerouteNo="0" devices="tripinfo_SouthBound_63" vType="typeNS" speedFactor="0.99" vaporized=""/>
+    <tripinfo id="SouthBound_68" depart="256.00" departLane="N-0N_0" departPos="7.10" departSpeed="0.00" departDelay="0.00" arrival="307.00" arrivalLane="0S-S_1" arrivalPos="10.00" arrivalSpeed="17.07" duration="51.00" routeLength="613.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="14.79" rerouteNo="0" devices="tripinfo_SouthBound_68" vType="typeNS" speedFactor="1.04" vaporized=""/>
+    <tripinfo id="SouthBound_70" depart="262.00" departLane="N-0N_0" departPos="7.10" departSpeed="0.00" departDelay="4.00" arrival="311.00" arrivalLane="0S-S_0" arrivalPos="10.00" arrivalSpeed="16.66" duration="49.00" routeLength="613.10" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="12.55" rerouteNo="0" devices="tripinfo_SouthBound_70" vType="typeNS" speedFactor="1.02" vaporized=""/>

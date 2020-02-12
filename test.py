@@ -79,6 +79,10 @@ def run():
     # we start with phase 2 where EW has green
    
     traci.junction.subscribeContext("tl0", tc.CMD_GET_VEHICLE_VARIABLE, 300, [tc.VAR_SPEED, tc.VAR_WAITING_TIME]) 
+    
+#    traci.junction.subscribeContext("tl0", tc.CMD_GET_VEHICLE_VARIABLE, 300, 
+#                                    [tc.VAR_ARRIVED_VEHICLES_NUMBER, tc.VAR_DEPARTED_VEHICLES_NUMBER,
+#                                     tc.VAR_WAITING_TIME,tc.VAR_ACCUMULATED_WAITING_TIME,tc.VAR_LOADED_VEHICLES_NUMBER])
     print(traci.junction.getContextSubscriptionResults("tl0"))
 #   traci.trafficlight.setPhase("tl0", 2)
 #    while traci.lane.getLastStepVehicleNumber("0W-0_0") <200:
