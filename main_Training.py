@@ -1,5 +1,5 @@
 import gym
-from RLModel_DQNTutorial import Agent
+from RL_ModelImplementations import Agent
 import numpy as np
 
 OBSERVATIONS_SIZE = 8
