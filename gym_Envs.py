@@ -12,7 +12,7 @@ import sys
 import numpy as np
 import gym
 from gym import spaces
-# from Env_TLC import Env_TLC
+import Env_TLC
 from helper import state_to_array
 
 # Import python modules from the $SUMO_HOME/tools directory
@@ -47,22 +47,29 @@ class durationEnv(gym.Env):
         # This is supposed to be an instatiation of a sumo simulation, along
         # with the handle of a valid traci active connection
 
+        trfcLgt_simulation = Env_TLC()
+
         # Observational state constituents for a junction of 8 lanes (right on
         # red is not taken into account in the Traffic Light logic)
         # [a, b, c, d, e, f, g, h]:
         # Occupancy is the number of cars for each lane in the junction
         self.IB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
-        self.OB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
+
         self.queue_sizes = [0, 0, 0, 0, 0, 0, 0, 0]  # n cars stoped at light
-        self.speed_limit = [0, 0, 0, 0, 0, 0, 0, 0]  # in m/s
+        self.mean_speed = [0, 0, 0, 0, 0, 0, 0, 0]  # in m/s
+
+        # Outbound occupancy is lane agnostic so we might only need 4 cardinal
+        # directions
+        self.OB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
 
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         program = ['rrGGrrGG', 'GGrrGGrr'] * 12
         self.current_tlProgram = np.array([state_to_array(state)
                                            for state in program])
         observation = np.vstack((self.edge_occupancy,
+                                 self.OB_lane_occupancy,
                                  self.queue_sizes,
-                                 self.speed_limit,
+                                 self.mean_speed,
                                  self.current_tlProgram))
         pp('Program Environement instatiated')
 
