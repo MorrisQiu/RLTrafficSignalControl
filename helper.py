@@ -1,7 +1,8 @@
-from pprint import pprint as pp
+from time import sleep
+# from pprint import pprint as pp
 import numpy as np
 import itertools
-import random
+# import random
 
 # tls = traci.trafficlight
 # tl_list = tls.getIDList()
@@ -87,16 +88,13 @@ def get_actions(elements, N):
     return result
 
 
-all_actions = get_actions([0, 1, 2, 3], 8)
+# all_actions = get_actions([0, 1, 2, 3], 8)
 
-actions = [state for state
-                in all_actions if
-                not has_conflict(state, conf_1)]
+# actions = [state for state
+    # in all_actions if
+    # not has_conflict(state, conf_1)]
 
-print(f'Permutations without conflict: {len(actions)}')
-
-
-from time import sleep
+# print(f'Permutations without conflict: {len(actions)}')
 
 def check_conflicts(action_space):
     for i in range(len(action_space)):
