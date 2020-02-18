@@ -12,8 +12,9 @@ import sys
 import numpy as np
 import gym
 from gym import spaces
-import Env_TLC
 from helper import state_to_array
+from sumoWrapper import Env_TLC
+from sumoWrapper import getReward
 
 # Import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -33,7 +34,7 @@ class durationEnv(gym.Env):
 
         super(durationEnv, self).__init__()
 
-        # TODO Define the Action space
+        # Action space
         # a descrete set of actions to be passed to the traci module for
         # execution
 
@@ -43,24 +44,29 @@ class durationEnv(gym.Env):
         # Example action
         # pp( f'action {i}: {actions[self.action_field.sample()]}')
 
-        # TODO Define the Observational space
+        # Observational space
         # This is supposed to be an instatiation of a sumo simulation, along
         # with the handle of a valid traci active connection
-
-        trfcLgt_simulation = Env_TLC()
 
         # Observational state constituents for a junction of 8 lanes (right on
         # red is not taken into account in the Traffic Light logic)
         # [a, b, c, d, e, f, g, h]:
-        # Occupancy is the number of cars for each lane in the junction
-        self.IB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
+        tlID = TL.getIDList()[0]
+        self.trfcLgt_simulation = Env_TLC(programID='0', tlsID=tlID)
+        self.observation_space = np.zeros(35,8)
+        print(self.observation_space)
 
-        self.queue_sizes = [0, 0, 0, 0, 0, 0, 0, 0]  # n cars stoped at light
-        self.mean_speed = [0, 0, 0, 0, 0, 0, 0, 0]  # in m/s
-
-        # Outbound occupancy is lane agnostic so we might only need 4 cardinal
-        # directions
-        self.OB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
+        # 'IBOccupancy',
+        # 'IBVolume',
+        # 'IBMeanSpeed',
+        # 'IBQueuSize',
+        # 'IBWaitingTime',
+        # 'OBOccupancy',
+        # 'OBVolume',
+        # 'OBMeanSpeed',
+        # 'OBQueuSize',
+        # 'OBWaitingTime'
+        # 'CurrentPhase'
 
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         program = ['rrGGrrGG', 'GGrrGGrr'] * 12
@@ -80,6 +86,28 @@ class durationEnv(gym.Env):
         # for calculating the reward)
 
         # the step uses the traci handle to excecute the action
+
+        reward, observation = simulate_action(action, time_horizon)
+        '''
+        def getReward(action):
+            update duration for program index n + 1
+
+            for i in range(self.action_space[action]):
+                trc.simulation.step()
+                aggregate outbound flow of cars and total waiting time
+                for reward calculation
+
+            reward = (total flow of cars - sigmoid(total_waiting_time)) / action
+
+            self.trfcLgt_simulation.updateLastState()
+            observation = self.trfcLgt_simulation.getStateArray()
+            return reward, observation
+
+        done = trc.currentTimeIndex == time_horizon
+        info = 1  # TODO
+        '''
+
+        # return observation_, reward, done, info
         pass
 
     def reset(self):
@@ -104,7 +132,7 @@ class programEnv(gym.Env):
 
         super(programEnv, self).__init__()
 
-        # TODO Define the Action space
+        # Action Space
         # a descrete set of actions to be passed to the traci module for
         # execution
 
@@ -113,7 +141,8 @@ class programEnv(gym.Env):
 
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         # one phase:['abcdefgh']
-        program_0 = ['rrggrrgg', 'ggrrggrr'] * 12
+        program_0 = ['rrggrrgg',
+                     'ggrrggrr'] * 12
 
         program_1 = ['grrrgrrr',
                      'rgrrrgrr',
