@@ -24,7 +24,7 @@ else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
 
-class durationEnv(gym.Env):
+class sumoDurationEnv(gym.Env):
     """ Custom Environement following gym specs"""
 
     def __init__(self,
@@ -32,7 +32,7 @@ class durationEnv(gym.Env):
                  nbr_actions=8,
                  *args, **kargs):
 
-        super(durationEnv, self).__init__()
+        super(sumoDurationEnv, self).__init__()
 
         # Action space
         # a descrete set of actions to be passed to the traci module for
@@ -95,14 +95,8 @@ class durationEnv(gym.Env):
         # TODO Reset the environement to an initial state
         pass
 
-    def render(self, mode='human', close=False):
 
-        # TODO OPTIONAL: Use sumo-gui to display the simulation for a
-        # particular window of time
-        pass
-
-
-class programEnv(gym.Env):
+class sumoProgramEnv(gym.Env):
     """ Custom Environement following gym specs"""
 
     def __init__(self,
@@ -110,7 +104,7 @@ class programEnv(gym.Env):
                  nbr_actions=8,
                  *args, **kargs):
 
-        super(programEnv, self).__init__()
+        super(sumoProgramEnv, self).__init__()
 
         # Action Space
         # a descrete set of actions to be passed to the traci module for
@@ -194,5 +188,5 @@ class programEnv(gym.Env):
         pass
 
 
-test_DurationEnv = durationEnv()
-test_ProgramEnv = programEnv()
+test_ProgramEnv = sumoProgramEnv()
+test_DurationEnv = sumoDurationEnv()
