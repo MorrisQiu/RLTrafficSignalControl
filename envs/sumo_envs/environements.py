@@ -16,13 +16,6 @@ from helper import state_to_array
 from sumoWrapper import Env_TLC
 from sumoWrapper import getReward
 
-# Import python modules from the $SUMO_HOME/tools directory
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("please declare environment variable 'SUMO_HOME'")
-
 
 class sumoDurationEnv(gym.Env):
     """ Custom Environement following gym specs"""
@@ -56,17 +49,18 @@ class sumoDurationEnv(gym.Env):
         self.observation_space = np.zeros(35,8)
         print(self.observation_space)
 
-        # 'IBOccupancy',
-        # 'IBVolume',
-        # 'IBMeanSpeed',
-        # 'IBQueuSize',
-        # 'IBWaitingTime',
-        # 'OBOccupancy',
-        # 'OBVolume',
-        # 'OBMeanSpeed',
-        # 'OBQueuSize',
-        # 'OBWaitingTime'
-        # 'NextPhaseRYG'
+        # 'IBOccupancy' (1 x 8)
+        # 'IBVolume' (1 x 8)
+        # 'IBMeanSpeed' (1 x 8)
+        # 'IBQueuSize' (1 x 8)
+        # 'IBWaitingTime' (1 x 8)
+        # 'OBOccupancy' (1 x 8)
+        # 'OBVolume' (1 x 8)
+        # 'OBMeanSpeed' (1 x 8)
+        # 'OBQueuSize' (1 x 8)
+        # 'OBWaitingTime (1 x 8)
+        # 'FullProgramRYGCycle (24 x 8)
+        # 'NextPhaseRYG (1 x 8)
 
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         program = ['rrGGrrGG', 'GGrrGGrr'] * 12
