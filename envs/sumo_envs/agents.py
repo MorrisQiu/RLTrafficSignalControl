@@ -14,7 +14,7 @@ import gym
 from gym import spaces
 from helper import state_to_array
 from sumoWrapper import Env_TLC
-from sumoWrapper import getReward
+from sumoWrapper import SimulateDuration
 
 
 class sumoDurationEnv(gym.Env):
@@ -45,7 +45,7 @@ class sumoDurationEnv(gym.Env):
         # red is not taken into account in the Traffic Light logic)
         # [a, b, c, d, e, f, g, h]:
         tlID = TL.getIDList()[0]
-        self.trfcLgt_simulation = Env_TLC(programID='0', tlsID=tlID)
+        self.TcLt_simulation = Env_TLC(programID='0', tlsID=tlID)
         self.observation_space = np.zeros(35,8)
         print(self.observation_space)
 
@@ -66,23 +66,19 @@ class sumoDurationEnv(gym.Env):
         program = ['rrGGrrGG', 'GGrrGGrr'] * 12
         self.current_tlProgram = np.array([state_to_array(state)
                                            for state in program])
-        observation = np.vstack((self.edge_occupancy,
-                                 self.OB_lane_occupancy,
-                                 self.queue_sizes,
-                                 self.mean_speed,
-                                 self.current_tlProgram))
+
         pp('Program Environement instatiated')
 
     def step(self, action):
-
         # TODO Use the selected action to complete a step in environement,
         # while carefully using the corresponding RL scope (horizon necessary
         # for calculating the reward)
 
-        reward, observation = simulate_action(action, time_horizon)
+        reward, observation_, done, info = \
+            self.TcLt_simulation.SimulateDuration(action)
 
-        # return observation_, reward, done, info
-        pass
+        return observation_, reward, done, info
+        # pass
 
     def reset(self):
 

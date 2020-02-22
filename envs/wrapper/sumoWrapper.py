@@ -19,9 +19,10 @@ else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
 # import traci.constants as tc
-import traci as trc
-from traci import trafficlight as TL
-from traci import lane as Ln
+import traci  # noqa: E402, F401
+from traci import trafficlight as TL  # noqa: E402
+from traci import lane as Ln  # noqa: E402
+from traci import simulation as Sim  # noqa: E402, F401
 
 
 class Env_TLC:
@@ -33,7 +34,9 @@ class Env_TLC:
 
     def __init__(self, programID, tlsID):
         self.ID = tlsID
+        self.light_logic = TL.getCompleteRedYellowGreenDefinition(self.ID)[0]
         self.programID = programID
+        self.CurrentPhase = TL.getPhase(self.ID)
         self.lanes = TL.getControlledLanes(self.ID)
         self.links = TL.getControlledLinks(tlsID)
         self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)
@@ -43,7 +46,7 @@ class Env_TLC:
         self.OBlaneList = [self.links[i][0][1]for i in range(len(self.links))]
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
 
-    def getStateArray():
+    def getStateArray(self, ):
         return np.row_stack([np.array(each)
                              for each in self.last_state.values()])
 
@@ -71,7 +74,21 @@ class Env_TLC:
         self.last_state['OBWaitingTime'] = [Ln.getWaitingTime(
             laneID) for laneID in self.OBlaneList]
 
-    def SimulateDAgentAction(action, action_space):
+    def ChangePhase(self, phase_index):
+        TL.setPhase(self.ID, phase_index)
+        return
+
+    def SimulateDuration(self, duration):
+        reward = 0
+        observation_ = []
+        done = 0
+        info = {}
+
+        self.current_duration = TL.getPhaseDuration()
+
+        if Sim.getTime() == TL.getNextSwitch(self.ID):
+            self.action_performance['startOBVolume'] = \
+                [Ln.getLastStepVehicleNumber(laneID) for laneID in self.OBlaneList]
         '''
         update duration for program index n + 1
 
@@ -88,4 +105,4 @@ class Env_TLC:
         done = trc.currentTimeIndex == time_horizon
         info = 1  # TODO
         '''
-        pass
+        return reward, observation_, done, info

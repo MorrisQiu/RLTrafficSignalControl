@@ -1,4 +1,4 @@
-from envs.sumo_envs.environements import (
+from envs.sumo_envs.agents import (
     sumoDurationEnv,
     sumoProgramEnv
 )
