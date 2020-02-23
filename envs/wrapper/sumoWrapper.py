@@ -23,6 +23,9 @@ import traci  # noqa: E402, F401
 from traci import trafficlight as TL  # noqa: E402
 from traci import lane as Ln  # noqa: E402
 from traci import simulation as Sim  # noqa: E402, F401
+from traci import lanearea as La  # noqa: E402, F401
+
+Sim.saveState('test_save_state.xml')
 
 
 class Env_TLC:
@@ -78,31 +81,57 @@ class Env_TLC:
         TL.setPhase(self.ID, phase_index)
         return
 
+    def StepAndCalculate(seconds, OBDetectors):
+        Starting_VehIDs = []
+        Total_VehIDs = []
+        Current_VehIDs = []
+
+        # Query for Starting Vehicles in OBDetector Areas
+        for each in [list(La.getLastStepVehicleIDs(lane_area))
+                     for lane_area in OBDetectors]:
+                for ID in each:
+                    Starting_VehIDs.append(ID)
+
+        # Query for Total Vehicles in OBDetector Areas
+        for _ in range(seconds):
+            for each in [list(La.getLastStepVehicleIDs(lane_area))
+                         for lane_area in OBDetectors]:
+                for ID in each:
+                    if ID not in Total_VehIDs:
+                        Total_VehIDs.append(ID)
+            traci.simulationStep()
+
+        # Query for remaining Vehicles in OBDetector Areas
+        for each in [list(La.getLastStepVehicleIDs(lane_area))
+                     for lane_area in OBDetectors]:
+                for ID in each:
+                    Current_VehIDs.append(ID)
+        return len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
+
     def SimulateDuration(self, duration):
-        reward = 0
-        observation_ = []
-        done = 0
-        info = {}
+        # current_time = traci.getTime()
+        reward = -300
+        done = 1
+        reward_period = 120
+        lane_areas = La.getIDList()
 
-        self.current_duration = TL.getPhaseDuration()
+        self.current_phase_duration = TL.getPhaseDuration()
+        self.light_logic.\
+            getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
 
-        if Sim.getTime() == TL.getNextSwitch(self.ID):
-            self.action_performance['startOBVolume'] = \
-                [Ln.getLastStepVehicleNumber(laneID) for laneID in self.OBlaneList]
-        '''
-        update duration for program index n + 1
+        nbr_Veh_left_OB = self.StepAndCalculate(
+            reward_period,
+            OBDetectors=lane_areas)
 
-        for i in range(self.action_space[action]):
-            trc.simulation.step()
-            aggregate outbound flow of cars and total waiting time
-            for reward calculation
+        Total_Waiting_Times = [Ln.getWaitingTime(lane) for
+                               lane in self.IBlaneList]
 
-        reward = (total flow of cars - sigmoid(total_waiting_time)) / action
+        reward = (nbr_Veh_left_OB / duration) - sum(Total_Waiting_Times)
+        # reward = (total flow of cars - sigmoid(total_waiting_time)) / action
 
-        self.trfcLgt_simulation.updateLastState()
-        observation_ = self.trfcLgt_simulation.getStateArray()
+        self.updateLastState()
+        observation_ = self.getStateArray()
 
-        done = trc.currentTimeIndex == time_horizon
-        info = 1  # TODO
-        '''
+        info = {}  # TODO
+
         return reward, observation_, done, info
