@@ -13,6 +13,7 @@ import numpy as np
 import gym
 from gym import spaces
 from helper import state_to_array
+import sumoWrapper
 from sumoWrapper import Env_TLC
 from sumoWrapper import SimulateDuration
 from sumoWrapper import ResetSimulation
@@ -23,7 +24,7 @@ class sumoDurationEnv(gym.Env):
 
     def __init__(self,
                  # agent_type='JAgent',
-                 nbr_actions=8,
+                 # nbr_actions=8,
                  *args, **kargs):
 
         super(sumoDurationEnv, self).__init__()
@@ -39,17 +40,22 @@ class sumoDurationEnv(gym.Env):
         # pp( f'action {i}: {actions[self.action_field.sample()]}')
 
         # Observational space
-        # This is supposed to be an instatiation of a sumo simulation, along
-        # with the handle of a valid traci active connection
+        # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
+        program = ['rrGGrrGG', 'GGrrGGrr'] * 12
+        self.current_tlProgram = np.array([state_to_array(state)
+                                           for state in program])
 
         # Observational state constituents for a junction of 8 lanes (right on
         # red is not taken into account in the Traffic Light logic)
         # [a, b, c, d, e, f, g, h]:
         tlID = 'tl0'
-        tlID = TL.getIDList()[0]
-        self.TcLt_simulation = Env_TLC(programID='0', tlsID=tlID)
-        self.observation_space = np.zeros(35,8)
-        # print(self.observation_space)
+        # tlID = TL.getIDList()[0]
+        self.TcLt_simulation = Env_TLC(
+            program_sequence=self.current_tlProgram,
+            programID='0',
+            tlsID=tlID)
+
+        self.TcLt_simulation.ResetSimulation()
 
         # 'IBOccupancy' (1 x 8)
         # 'IBVolume' (1 x 8)
@@ -63,11 +69,6 @@ class sumoDurationEnv(gym.Env):
         # 'OBWaitingTime (1 x 8)
         # 'FullProgramRYGCycle (24 x 8)
         # 'NextPhaseRYG (1 x 8)
-
-        # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
-        program = ['rrGGrrGG', 'GGrrGGrr'] * 12
-        self.current_tlProgram = np.array([state_to_array(state)
-                                           for state in program])
 
         pp('Program Environement instatiated')
 
@@ -84,8 +85,10 @@ class sumoDurationEnv(gym.Env):
 
     def reset(self):
 
-        ResetSimulation()
-        return
+        observation = self.TcLt_simulation.ResetSimulation()\
+            + self.current_tlProgram \
+            + state_to_array(self.TcLt_simulation.Current_Phase_State)
+        return observation
 
 
 class sumoProgramEnv(gym.Env):
@@ -179,6 +182,3 @@ class sumoProgramEnv(gym.Env):
         # particular window of time
         pass
 
-
-test_ProgramEnv = sumoProgramEnv()
-test_DurationEnv = sumoDurationEnv()

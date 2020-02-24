@@ -79,7 +79,7 @@ class Env_TLC:
 
     """
 
-    def __init__(self, programID, tlsID):
+    def __init__(self, program_sequence, programID, tlsID):
 
         sumoBinary = checkBinary('sumo-gui')
         generate_routefile()
@@ -93,12 +93,13 @@ class Env_TLC:
         Sim.saveState('test_save_state.xml')
 
         self.ID = tlsID
-        self.light_logic = TL.getCompleteRedYellowGreenDefinition(self.ID)[0]
         self.programID = programID
+        self.program_sequence = program_sequence
         self.CurrentPhase = TL.getPhase(self.ID)
+        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
         self.lanes = TL.getControlledLanes(self.ID)
         self.links = TL.getControlledLinks(tlsID)
-        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)
+        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)[0]
         self.last_state = {}
 
         self.IBlaneList = [self.links[i][0][0]for i in range(len(self.links))]
@@ -106,8 +107,9 @@ class Env_TLC:
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
 
     def getStateArray(self, ):
-        return np.row_stack([np.array(each)
-                             for each in self.last_state.values()])
+        value = np.row_stack(
+                [np.array(each) for each in self.last_state.values()])\
+            + self.program_sequence + self.Current_Phase_State
 
     def updateLastState(self, ):
 
@@ -132,6 +134,8 @@ class Env_TLC:
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBWaitingTime'] = [Ln.getWaitingTime(
             laneID) for laneID in self.OBlaneList]
+        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
+        self.CurrentPhase = TL.getPhase(self.ID)
 
     def ChangePhase(self, phase_index):
         TL.setPhase(self.ID, phase_index)
@@ -172,7 +176,7 @@ class Env_TLC:
         lane_areas = La.getIDList()
 
         self.current_phase_duration = TL.getPhaseDuration()
-        self.light_logic.\
+        self.RYG_definition.\
             getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
 
         nbr_Veh_left_OB = self.StepAndCalculate(
@@ -194,5 +198,9 @@ class Env_TLC:
 
     def ResetSimulation(self,):
         Sim.stop(False)
-
         traci.start(self.Restart_args)
+        Next_Switch = TL.TL.getNextSwitch(self.ID)
+        while traci.simulation.getTime() < Next_Switch:
+            traci.simulationStep()
+        self.updateLastState()
+        return self.getStateArray()
