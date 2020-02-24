@@ -3,6 +3,7 @@ import envs
 from RL_ModelImplementations import Agent
 import numpy as np
 
+NBR_GAMES = 20_000
 OBSERVATIONS_SIZE = 35 * 8
 NBR_ACTIONS = 8
 BATCH_SIZE = 64
@@ -23,7 +24,7 @@ if __name__ == '__main__':
         lr=LEARNING_RATE)
     scores = []
     eps_history = []
-    n_games = 500
+    n_games = NBR_GAMES
     score = 0
     for i in range(n_games):
         if i % 10 == 0 and i > 0:

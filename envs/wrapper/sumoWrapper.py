@@ -100,9 +100,22 @@ class Env_TLC:
         generate_routefile()
 
         self.Simulation_args = [sumoBinary, "-c", "../../data/road.sumocfg",
-                                "--tripinfo-output", "tripinfo.xml"]
+                             '-l', '../../data/log.xml',
+                             '--message-log', '../../messages.xml',
+                             '--error-log', '../../errors.xml',
+                            ]
         self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
-                             '--load-state', 'test_save_state.xml']
+                             '--load-state', 'test_save_state.xml',
+                             '-l', '../../data/log.xml',
+                             '--message-log', '../../messages.xml',
+                             '--error-log', '../../errors.xml'
+                             ]
+        '''
+    -l, --log FILE                       Writes all messages to FILE (implies
+    --message-log FILE                   Writes all non-error messages to FILE
+    --error-log FILE                     Writes all warnings and errors to FILE
+        '''
+
 
         traci.start(self.Simulation_args)
         Sim.saveState('test_save_state.xml')
