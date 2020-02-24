@@ -7,33 +7,27 @@ Custom Environement for building TrafficLight RL Agents using SUMO
 """
 
 from pprint import pprint as pp
-import os
-import sys
+# import os
+# import sys
 import numpy as np
 import gym
 from gym import spaces
-import Env_TLC
-from helper import state_to_array
-
-# Import python modules from the $SUMO_HOME/tools directory
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("please declare environment variable 'SUMO_HOME'")
+import envs.wrapper.sumoWrapper as sumoWrapper
+from envs.wrapper.sumoWrapper import Env_TLC
+from envs.wrapper.sumoWrapper import state_to_array
 
 
-class durationEnv(gym.Env):
+class sumoDurationEnv(gym.Env):
     """ Custom Environement following gym specs"""
 
     def __init__(self,
                  # agent_type='JAgent',
-                 nbr_actions=8,
+                 # nbr_actions=8,
                  *args, **kargs):
 
-        super(durationEnv, self).__init__()
+        super(sumoDurationEnv, self).__init__()
 
-        # TODO Define the Action space
+        # Action space
         # a descrete set of actions to be passed to the traci module for
         # execution
 
@@ -43,58 +37,57 @@ class durationEnv(gym.Env):
         # Example action
         # pp( f'action {i}: {actions[self.action_field.sample()]}')
 
-        # TODO Define the Observational space
-        # This is supposed to be an instatiation of a sumo simulation, along
-        # with the handle of a valid traci active connection
-
-        trfcLgt_simulation = Env_TLC()
-
-        # Observational state constituents for a junction of 8 lanes (right on
-        # red is not taken into account in the Traffic Light logic)
-        # [a, b, c, d, e, f, g, h]:
-        # Occupancy is the number of cars for each lane in the junction
-        self.IB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
-
-        self.queue_sizes = [0, 0, 0, 0, 0, 0, 0, 0]  # n cars stoped at light
-        self.mean_speed = [0, 0, 0, 0, 0, 0, 0, 0]  # in m/s
-
-        # Outbound occupancy is lane agnostic so we might only need 4 cardinal
-        # directions
-        self.OB_lane_occupancy = [0, 0, 0, 0, 0, 0, 0, 0]
-
+        # Observational space
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         program = ['rrGGrrGG', 'GGrrGGrr'] * 12
         self.current_tlProgram = np.array([state_to_array(state)
                                            for state in program])
-        observation = np.vstack((self.edge_occupancy,
-                                 self.OB_lane_occupancy,
-                                 self.queue_sizes,
-                                 self.mean_speed,
-                                 self.current_tlProgram))
+
+        # Observational state constituents for a junction of 8 lanes (right on
+        # red is not taken into account in the Traffic Light logic)
+        # [a, b, c, d, e, f, g, h]:
+        tlID = 'tl0'
+        # tlID = TL.getIDList()[0]
+        self.TcLt_simulation = Env_TLC(
+            program_sequence=self.current_tlProgram,
+            programID='0',
+            tlsID=tlID)
+
+        self.TcLt_simulation.ResetSimulation()
+
+        # 'IBOccupancy' (1 x 8)
+        # 'IBVolume' (1 x 8)
+        # 'IBMeanSpeed' (1 x 8)
+        # 'IBQueuSize' (1 x 8)
+        # 'IBWaitingTime' (1 x 8)
+        # 'OBOccupancy' (1 x 8)
+        # 'OBVolume' (1 x 8)
+        # 'OBMeanSpeed' (1 x 8)
+        # 'OBQueuSize' (1 x 8)
+        # 'OBWaitingTime (1 x 8)
+        # 'FullProgramRYGCycle (24 x 8)
+        # 'NextPhaseRYG (1 x 8)
+
         pp('Program Environement instatiated')
 
     def step(self, action):
-
         # TODO Use the selected action to complete a step in environement,
         # while carefully using the corresponding RL scope (horizon necessary
         # for calculating the reward)
 
-        # the step uses the traci handle to excecute the action
-        pass
+        reward, observation_, done, info = \
+            self.TcLt_simulation.SimulateDuration(self.action_space[action])
+
+        return observation_, reward, done, info
+
 
     def reset(self):
 
-        # TODO Reset the environement to an initial state
-        pass
-
-    def render(self, mode='human', close=False):
-
-        # TODO OPTIONAL: Use sumo-gui to display the simulation for a
-        # particular window of time
-        pass
+        observation = self.TcLt_simulation.ResetSimulation()
+        return observation
 
 
-class programEnv(gym.Env):
+class sumoProgramEnv(gym.Env):
     """ Custom Environement following gym specs"""
 
     def __init__(self,
@@ -102,9 +95,9 @@ class programEnv(gym.Env):
                  nbr_actions=8,
                  *args, **kargs):
 
-        super(programEnv, self).__init__()
+        super(sumoProgramEnv, self).__init__()
 
-        # TODO Define the Action space
+        # Action Space
         # a descrete set of actions to be passed to the traci module for
         # execution
 
@@ -113,7 +106,8 @@ class programEnv(gym.Env):
 
         # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
         # one phase:['abcdefgh']
-        program_0 = ['rrggrrgg', 'ggrrggrr'] * 12
+        program_0 = ['rrggrrgg',
+                     'ggrrggrr'] * 12
 
         program_1 = ['grrrgrrr',
                      'rgrrrgrr',
@@ -170,6 +164,7 @@ class programEnv(gym.Env):
         # while carefully using the corresponding RL scope (horizon necessary
         # for calculating the reward)
 
+        self.TcLt_simulation.SimulateDuration(self.action_space[action])
         # the step uses the traci handle to excecute the action
         pass
 
@@ -184,6 +179,3 @@ class programEnv(gym.Env):
         # particular window of time
         pass
 
-
-test_DurationEnv = durationEnv()
-test_ProgramEnv = programEnv()

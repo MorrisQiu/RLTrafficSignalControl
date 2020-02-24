@@ -29,6 +29,7 @@ def generate_routefile():
     random.seed(42)  # make tests reproducible
     N = 3600  # number of time steps
     # demand per second from different directions
+    # the maximun demand is 7.5 m per vechicle = 1./ 2
     pEB = 1. / 10
     pWB = 1. / 11
     pSB = 1. / 15

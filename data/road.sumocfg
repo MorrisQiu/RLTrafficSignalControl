@@ -5,7 +5,8 @@
     <input>
         <net-file value="road.net.xml"/>
         <route-files value="road.rou.xml"/>
-        <additional-files value="road.typ.xml"/>
+        <!--<type-files value="road.typ.xml"/>-->
+        <additional-files value="e2.add.xml"/>
     </input>
 
     <time>
@@ -13,8 +14,8 @@
     </time>
 
     <report>
-        <verbose value="true"/>
-        <no-step-log value="true"/>
+        <verbose value="false"/>
+        <no-step-log value="false"/>
     </report>
 
 </configuration>
