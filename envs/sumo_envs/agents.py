@@ -7,16 +7,14 @@ Custom Environement for building TrafficLight RL Agents using SUMO
 """
 
 from pprint import pprint as pp
-import os
-import sys
+# import os
+# import sys
 import numpy as np
 import gym
 from gym import spaces
-from helper import state_to_array
-import sumoWrapper
-from sumoWrapper import Env_TLC
-from sumoWrapper import SimulateDuration
-from sumoWrapper import ResetSimulation
+import envs.wrapper.sumoWrapper as sumoWrapper
+from envs.wrapper.sumoWrapper import Env_TLC
+from envs.wrapper.sumoWrapper import state_to_array
 
 
 class sumoDurationEnv(gym.Env):
@@ -85,9 +83,7 @@ class sumoDurationEnv(gym.Env):
 
     def reset(self):
 
-        observation = self.TcLt_simulation.ResetSimulation()\
-            + self.current_tlProgram \
-            + state_to_array(self.TcLt_simulation.Current_Phase_State)
+        observation = self.TcLt_simulation.ResetSimulation()
         return observation
 
 

@@ -1,4 +1,5 @@
 import gym
+import envs
 from RL_ModelImplementations import Agent
 import numpy as np
 
@@ -37,7 +38,7 @@ if __name__ == '__main__':
         observation = env.reset()
         score = 0
         while not done:
-            action = brain.choose_action(np.flatten(observation))
+            action = brain.choose_action(observation.flatten())
             observation_, reward, done, info = env.step(action)
             score += reward
             brain.store_transition(observation, action, reward,

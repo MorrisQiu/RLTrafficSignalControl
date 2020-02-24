@@ -9,7 +9,8 @@ import os
 import sys
 import random
 import numpy as np
-from sumolib import checkBinary
+
+from helper import state_to_array
 
 
 # Import python modules from the $SUMO_HOME/tools directory
@@ -20,12 +21,13 @@ else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
 # import traci.constants as tc
+from sumolib import checkBinary  # noqa: E402
 import traci  # noqa: E402, F401
-import traci.trafficlight as TL  # noqa: E402
-import traci.lane as Ln  # noqa: E402
-import traci.simulation as Sim  # noqa: E402, F401
-import traci.lanearea as La  # noqa: E402, F401
-import traci.constants as C  # noqa: E402, F401
+from traci import trafficlight as TL  # noqa: E402
+from traci import lane as Ln  # noqa: E402
+from traci import simulation as Sim  # noqa: E402, F401
+from traci import lanearea as La  # noqa: E402, F401
+from traci import constants as C  # noqa: E402, F401
 
 
 def generate_routefile():
@@ -36,7 +38,7 @@ def generate_routefile():
     pWB = 1. / 11
     pSB = 1. / 15
     pNB = 1. / 25
-    with open("data/road.rou.xml", "w") as routes:
+    with open("../../data/road.rou.xml", "w") as routes:
         print("""<routes>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
               minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
@@ -84,9 +86,9 @@ class Env_TLC:
         sumoBinary = checkBinary('sumo-gui')
         generate_routefile()
 
-        self.Simulation_args = [sumoBinary, "-c", "data/road.sumocfg",
+        self.Simulation_args = [sumoBinary, "-c", "../../data/road.sumocfg",
                                 "--tripinfo-output", "tripinfo.xml"]
-        self.Restart_args = [sumoBinary, '-c', 'data/road.sumocfg',
+        self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
                              '--load-state', 'test_save_state.xml',
                              '--output-prefix', 'TIME']
         traci.start(self.Simulation_args)
@@ -107,9 +109,12 @@ class Env_TLC:
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
 
     def getStateArray(self, ):
-        value = np.row_stack(
-                [np.array(each) for each in self.last_state.values()])\
-            + self.program_sequence + self.Current_Phase_State
+        observation = np.row_stack((
+            [np.array(each) for each in self.last_state.values()],
+            self.program_sequence,
+            state_to_array(self.Current_Phase_State)
+        ))
+        return observation
 
     def updateLastState(self, ):
 
@@ -141,7 +146,7 @@ class Env_TLC:
         TL.setPhase(self.ID, phase_index)
         return
 
-    def StepAndCalculate(seconds, OBDetectors):
+    def StepAndCalculate(seconds, OBDetectors=[]):
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
@@ -175,13 +180,13 @@ class Env_TLC:
         reward_period = 120
         lane_areas = La.getIDList()
 
-        self.current_phase_duration = TL.getPhaseDuration()
+        self.current_phase_duration = TL.getPhaseDuration(self.ID)
         self.RYG_definition.\
             getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
 
         nbr_Veh_left_OB = self.StepAndCalculate(
             reward_period,
-            OBDetectors=lane_areas)
+            OBDetectors=list(lane_areas))
 
         Total_Waiting_Times = [Ln.getWaitingTime(lane) for
                                lane in self.IBlaneList]
@@ -197,9 +202,9 @@ class Env_TLC:
         return reward, observation_, done, info
 
     def ResetSimulation(self,):
-        Sim.stop(False)
+        traci.close(False)
         traci.start(self.Restart_args)
-        Next_Switch = TL.TL.getNextSwitch(self.ID)
+        Next_Switch = TL.getNextSwitch(self.ID)
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
         self.updateLastState()
