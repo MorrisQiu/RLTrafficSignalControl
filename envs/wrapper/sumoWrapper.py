@@ -13,12 +13,16 @@ import numpy as np
 from helper import state_to_array
 
 
+
 # Import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
+
+import subprocess
+import sumolib
 
 # import traci.constants as tc
 from sumolib import checkBinary  # noqa: E402
@@ -30,6 +34,11 @@ from traci import lanearea as La  # noqa: E402, F401
 from traci import constants as C  # noqa: E402, F401
 
 
+PORT = sumolib.miscutils.getFreeSocketPort()
+sumoProc = subprocess.Popen(["sumo", "-c", "sumo.sumocfg", "--remote-port", str(PORT)],
+                            stdout=open(os.devnull, "w"))
+traci.init(PORT)
+
 def generate_routefile():
     random.seed(42)  # make tests reproducible
     N = 3600  # number of time steps
@@ -40,7 +49,10 @@ def generate_routefile():
     pNB = 1. / 25
     with open("../../data/road.rou.xml", "w") as routes:
         print("""<routes>
-        <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
+        <vType id="typeWE" accel="0.8" decel="4.5" sigPORT = sumolib.miscutils.getFreeSocketPort()
+sumoProc = subprocess.Popen(["sumo", "-c", "sumo.sumocfg", "--remote-port", str(PORT)],
+                            stdout=open(os.devnull, "w"))
+traci.init(PORT)ma="0.5" length="5" \
               minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
         <vType id="typeNS" accel="0.8" decel="4.5" sigma="0.5" length="7" \
               minGap="3" maxSpeed="25" guiShape="bus"/>
