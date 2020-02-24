@@ -7,8 +7,9 @@ Created on Tue Feb 11 13:40:29 2020
 
 import os
 import sys
+import random
 import numpy as np
-# from sumolib import checkBinary
+from sumolib import checkBinary
 
 
 # Import python modules from the $SUMO_HOME/tools directory
@@ -20,12 +21,55 @@ else:
 
 # import traci.constants as tc
 import traci  # noqa: E402, F401
-from traci import trafficlight as TL  # noqa: E402
-from traci import lane as Ln  # noqa: E402
-from traci import simulation as Sim  # noqa: E402, F401
-from traci import lanearea as La  # noqa: E402, F401
+import traci.trafficlight as TL  # noqa: E402
+import traci.lane as Ln  # noqa: E402
+import traci.simulation as Sim  # noqa: E402, F401
+import traci.lanearea as La  # noqa: E402, F401
+import traci.constants as C  # noqa: E402, F401
 
-Sim.saveState('test_save_state.xml')
+
+def generate_routefile():
+    random.seed(42)  # make tests reproducible
+    N = 3600  # number of time steps
+    # demand per second from different directions
+    pEB = 1. / 10
+    pWB = 1. / 11
+    pSB = 1. / 15
+    pNB = 1. / 25
+    with open("data/road.rou.xml", "w") as routes:
+        print("""<routes>
+        <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
+              minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
+        <vType id="typeNS" accel="0.8" decel="4.5" sigma="0.5" length="7" \
+              minGap="3" maxSpeed="25" guiShape="bus"/>
+
+        <route id="EastBound" edges="W-0W 0W-0 0-0E 0E-E" />
+        <route id="WestBound" edges="E-0E 0E-0 0-0W 0W-W" />
+        <route id="SouthBound" edges="N-0N 0N-0 0-0S 0S-S" />
+        <route id="NorthBound" edges="S-0S 0S-0 0-0N 0N-N" />""", file=routes)
+        vehNr = 0
+        for i in range(N):
+            if random.uniform(0, 1) < pEB:
+                print('    <vehicle id="EastBound_%i" type="typeWE" \
+                      route="EastBound" depart="%i" />' \
+                      % (vehNr, i), file=routes)
+                vehNr += 1
+            if random.uniform(0, 1) < pWB:
+                print('    <vehicle id="WestBound_%i" type="typeWE" \
+                      route="WestBound" depart="%i" />' \
+                      % (vehNr, i), file=routes)
+                vehNr += 1
+            if random.uniform(0, 1) < pSB:
+                print('    <vehicle id="SouthBound_%i" type="typeNS" \
+                      route="SouthBound" depart="%i" color="1,0,0"/>' \
+                      % (vehNr, i), file=routes)
+                vehNr += 1
+            if random.uniform(0, 1) < pNB:
+                print('    <vehicle id="NorthBound_%i" type="typeNS" \
+                      route="NorthBound" depart="%i" color="1,0,0"/>' \
+                      % (vehNr, i), file=routes)
+                vehNr += 1
+        print("</routes>", file=routes)
 
 
 class Env_TLC:
@@ -36,6 +80,18 @@ class Env_TLC:
     """
 
     def __init__(self, programID, tlsID):
+
+        sumoBinary = checkBinary('sumo-gui')
+        generate_routefile()
+
+        self.Simulation_args = [sumoBinary, "-c", "data/road.sumocfg",
+                                "--tripinfo-output", "tripinfo.xml"]
+        self.Restart_args = [sumoBinary, '-c', 'data/road.sumocfg',
+                             '--load-state', 'test_save_state.xml',
+                             '--output-prefix', 'TIME']
+        traci.start(self.Simulation_args)
+        Sim.saveState('test_save_state.xml')
+
         self.ID = tlsID
         self.light_logic = TL.getCompleteRedYellowGreenDefinition(self.ID)[0]
         self.programID = programID
@@ -135,3 +191,8 @@ class Env_TLC:
         info = {}  # TODO
 
         return reward, observation_, done, info
+
+    def ResetSimulation(self,):
+        Sim.stop(False)
+
+        traci.start(self.Restart_args)

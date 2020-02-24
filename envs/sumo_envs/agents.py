@@ -15,6 +15,7 @@ from gym import spaces
 from helper import state_to_array
 from sumoWrapper import Env_TLC
 from sumoWrapper import SimulateDuration
+from sumoWrapper import ResetSimulation
 
 
 class sumoDurationEnv(gym.Env):
@@ -44,10 +45,11 @@ class sumoDurationEnv(gym.Env):
         # Observational state constituents for a junction of 8 lanes (right on
         # red is not taken into account in the Traffic Light logic)
         # [a, b, c, d, e, f, g, h]:
+        tlID = 'tl0'
         tlID = TL.getIDList()[0]
         self.TcLt_simulation = Env_TLC(programID='0', tlsID=tlID)
         self.observation_space = np.zeros(35,8)
-        print(self.observation_space)
+        # print(self.observation_space)
 
         # 'IBOccupancy' (1 x 8)
         # 'IBVolume' (1 x 8)
@@ -78,12 +80,12 @@ class sumoDurationEnv(gym.Env):
             self.TcLt_simulation.SimulateDuration(action)
 
         return observation_, reward, done, info
-        # pass
+
 
     def reset(self):
 
-        # TODO Reset the environement to an initial state
-        pass
+        ResetSimulation()
+        return
 
 
 class sumoProgramEnv(gym.Env):
