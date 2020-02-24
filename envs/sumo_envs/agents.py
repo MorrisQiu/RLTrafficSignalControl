@@ -76,7 +76,7 @@ class sumoDurationEnv(gym.Env):
         # for calculating the reward)
 
         reward, observation_, done, info = \
-            self.TcLt_simulation.SimulateDuration(action)
+            self.TcLt_simulation.SimulateDuration(self.action_space[action])
 
         return observation_, reward, done, info
 
@@ -164,6 +164,7 @@ class sumoProgramEnv(gym.Env):
         # while carefully using the corresponding RL scope (horizon necessary
         # for calculating the reward)
 
+        self.TcLt_simulation.SimulateDuration(self.action_space[action])
         # the step uses the traci handle to excecute the action
         pass
 

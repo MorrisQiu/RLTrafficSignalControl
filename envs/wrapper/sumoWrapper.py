@@ -83,14 +83,15 @@ class Env_TLC:
 
     def __init__(self, program_sequence, programID, tlsID):
 
-        sumoBinary = checkBinary('sumo-gui')
+        sumoBinary = checkBinary('sumo')
+        # sumoBinary = checkBinary('sumo-gui')
         generate_routefile()
 
         self.Simulation_args = [sumoBinary, "-c", "../../data/road.sumocfg",
                                 "--tripinfo-output", "tripinfo.xml"]
         self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
-                             '--load-state', 'test_save_state.xml',
-                             '--output-prefix', 'TIME']
+                             '--load-state', 'test_save_state.xml']
+
         traci.start(self.Simulation_args)
         Sim.saveState('test_save_state.xml')
 
@@ -146,7 +147,7 @@ class Env_TLC:
         TL.setPhase(self.ID, phase_index)
         return
 
-    def StepAndCalculate(seconds, OBDetectors=[]):
+    def StepAndCalculate(self, seconds, OBDetectors=[]):
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
@@ -186,7 +187,7 @@ class Env_TLC:
 
         nbr_Veh_left_OB = self.StepAndCalculate(
             reward_period,
-            OBDetectors=list(lane_areas))
+            lane_areas)
 
         Total_Waiting_Times = [Ln.getWaitingTime(lane) for
                                lane in self.IBlaneList]

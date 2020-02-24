@@ -41,8 +41,8 @@ if __name__ == '__main__':
             action = brain.choose_action(observation.flatten())
             observation_, reward, done, info = env.step(action)
             score += reward
-            brain.store_transition(observation, action, reward,
-                                   observation_, done)
+            brain.store_transition(observation.flatten(), action, reward,
+                                   observation_.flatten(), done)
             observation = observation_
             brain.learn()
         scores.append(score)
