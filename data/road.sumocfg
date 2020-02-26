@@ -7,6 +7,8 @@
         <route-files value="road.rou.xml"/>
         <!--<type-files value="road.typ.xml"/>-->
         <additional-files value="e2.add.xml"/>
+        <start value="true"/> 
+        <gui-settings-file value="road.settings.xml"/>
     </input>
 
     <time>
