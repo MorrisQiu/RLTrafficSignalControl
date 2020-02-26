@@ -21,8 +21,8 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
-#import subprocess
-#import sumolib
+import subprocess
+import sumolib
 
 # import traci.constants as tc
 from sumolib import checkBinary  # noqa: E402
@@ -35,9 +35,11 @@ from traci import constants as C  # noqa: E402, F401
 
 
 #PORT = sumolib.miscutils.getFreeSocketPort()
-#sumoProc = subprocess.Popen(["sumo", "-c", "sumo.sumocfg", "--remote-port", str(PORT)],
+#sumoProc = subprocess.Popen(["sumo", "-c", "../../data/road.sumocfg", "--remote-port", str(PORT)],
 #                            stdout=open(os.devnull, "w"))
 #traci.init(PORT)
+
+#sys.stdout = open(os.devnull, 'w')
 
 def generate_routefile():
     random.seed(42)  # make tests reproducible
@@ -92,25 +94,39 @@ class Env_TLC:
 
     def __init__(self, program_sequence, programID, tlsID):
 
-        sumoBinary = checkBinary('sumo')
-        # sumoBinary = checkBinary('sumo-gui')
+        #sumoBinary = checkBinary('sumo')
+        sumoBinary = checkBinary('sumo-gui')
         generate_routefile()
 
         self.Simulation_args = [sumoBinary, "-c", "../../data/road.sumocfg",
                              '-l', '../../data/log.xml',
                              '--message-log', '../../messages.xml',
                              '--error-log', '../../errors.xml',
-                            ]
+                             "-W", "true",
+                             "--no-step-log", "true",
+                             "--duration-log.disable","true"
+                             #"-S","true"
+                             ]
         self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
                              '--load-state', 'test_save_state.xml',
                              '-l', '../../data/log.xml',
                              '--message-log', '../../messages.xml',
-                             '--error-log', '../../errors.xml'
+                             '--error-log', '../../errors.xml',
+                             "-W", "true",
+                             "--no-step-log", "true",
+                             "--duration-log.disable","true"
+                             #"-S","true"
                              ]
         '''
-    -l, --log FILE                       Writes all messages to FILE (implies
+    -l, --log FILE                       Writes all messages to FILE (implies verbose)
     --message-log FILE                   Writes all non-error messages to FILE
     --error-log FILE                     Writes all warnings and errors to FILE
+    -W <BOOL>
+        --no-warnings <BOOL>	Disables output of warnings; default: false
+    --no-step-log, <BOOL> = Disable console output of current simulation step; default: false
+    --duration-log.disable <BOOL>	Disable performance reports for individual simulation steps; default: false
+    GUI only:
+    -S <BOOL> --start <BOOL>	Start the simulation after loading; default: false
         '''
 
 
@@ -123,8 +139,8 @@ class Env_TLC:
         self.CurrentPhase = TL.getPhase(self.ID)
         self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
         self.lanes = TL.getControlledLanes(self.ID)
-        self.links = TL.getControlledLinks(tlsID)
-        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)[0]
+        self.links = TL.getControlledLinks(self.ID)
+        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(self.ID)[0]
         self.last_state = {}
 
         self.IBlaneList = [self.links[i][0][0]for i in range(len(self.links))]
@@ -157,7 +173,7 @@ class Env_TLC:
         self.last_state['OBVolume'] = [Ln.getLastStepVehicleNumber(
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBMeanSpeed'] = [Ln.getLastStepMeanSpeed(
-            laneID) for laneID in self.IBlaneList]
+            laneID) for laneID in self.OBlaneList]
         self.last_state['OBQueuSize'] = [Ln.getLastStepHaltingNumber(
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBWaitingTime'] = [Ln.getWaitingTime(

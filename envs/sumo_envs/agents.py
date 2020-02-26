@@ -68,7 +68,7 @@ class sumoDurationEnv(gym.Env):
         # 'FullProgramRYGCycle (24 x 8)
         # 'NextPhaseRYG (1 x 8)
 
-        pp('Program Environement instatiated')
+        pp('Duration Environement instatiated')
 
     def step(self, action):
         # TODO Use the selected action to complete a step in environement,
@@ -178,4 +178,3 @@ class sumoProgramEnv(gym.Env):
         # TODO OPTIONAL: Use sumo-gui to display the simulation for a
         # particular window of time
         pass
-
