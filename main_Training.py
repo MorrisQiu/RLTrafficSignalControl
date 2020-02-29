@@ -24,9 +24,8 @@ if __name__ == '__main__':
         lr=LEARNING_RATE)
     scores = []
     eps_history = []
-    n_games = NBR_GAMES
     score = 0
-    for i in range(n_games):
+    for i in range(NBR_GAMES):
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i-10):(i+1)])
             print('episode', i, ' score', score,
