@@ -16,9 +16,55 @@ import envs.wrapper.sumoWrapper as sumoWrapper
 from envs.wrapper.sumoWrapper import Env_TLC
 from envs.wrapper.sumoWrapper import state_to_array
 
+# Possible durations to be chosen from
+DURATION_ACTIONS = [7, 15, 25, 35, 50, 70, 90, 120]
+
+# Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
+# one phase:['abcdefgh'] each letter is one lane (right on red lanes are
+# ignored)
+program_0 = ['rrggrrgg',
+             'ggrrggrr'] * 12
+
+program_1 = ['grrrgrrr',
+             'rgrrrgrr',
+             'rrgrrrgr',
+             'rrrgrrrg'] * 6
+
+program_2 = ['grrrgrrr',
+             'ggrrggrr',
+             'rgrrrgrr',
+             'rrgrrrgr',
+             'rrggrrgg',
+             'rrrgrrrg'] * 4
+
+program_3 = ['grrrgrrr',
+             'ggrrggrr',
+             'rrgrrrgr',
+             'rrggrrgg'] * 6
+
+program_4 = ['ggrrggrr',
+             'rgrrrgrr',
+             'rrgrrrgr',
+             'rrggrrgg'] * 6
+
+program_5 = ['grrrrrrr',
+             'rgrrrrrr',
+             'rrgrrrrr',
+             'rrrgrrrr',
+             'rrrrgrrr',
+             'rrrrrgrr',
+             'rrrrrrgr',
+             'rrrrrrrg'] * 3
+
+PROGRAM_ACTIONS = [program_0, program_1, program_2, program_3, program_4,
+                   program_5]
+
 
 class sumoDurationEnv(gym.Env):
-    """ Custom Environement following gym specs"""
+    """ Environement for training on the perfect Duration of the next traffic
+    light phase which maximizes performance (as determined by the reward
+    metric)
+    """
 
     def __init__(self,
                  # agent_type='JAgent',
@@ -68,27 +114,37 @@ class sumoDurationEnv(gym.Env):
         # 'FullProgramRYGCycle (24 x 8)
         # 'NextPhaseRYG (1 x 8)
 
-        pp('Program Environement instatiated')
+        pp('Duration Environement instatiated')
 
     def step(self, action):
-        # TODO Use the selected action to complete a step in environement,
-        # while carefully using the corresponding RL scope (horizon necessary
-        # for calculating the reward)
+        ''' Use the selected action to complete a step in environement,
+        while carefully using the corresponding RL scope (horizon necessary for
+                calculating the reward) '''
 
         reward, observation_, done, info = \
             self.TcLt_simulation.SimulateDuration(self.action_space[action])
 
         return observation_, reward, done, info
 
-
     def reset(self):
+        '''
+        Reset the simulation state to the next decision making timestep
+        '''
 
         observation = self.TcLt_simulation.ResetSimulation()
         return observation
 
+    def render(self, mode='human', close=False):
+
+        # TODO OPTIONAL: Use sumo-gui to display the simulation for a
+        # particular window of time
+        pass
+
 
 class sumoProgramEnv(gym.Env):
-    """ Custom Environement following gym specs"""
+    """ Environement for training on the perfect TrfcLgt Program (sequence of
+    light configurations for each lane) which maximizes perfomance (as
+    determined by the reward metric)"""
 
     def __init__(self,
                  # agent_type='JAgent',
@@ -103,59 +159,16 @@ class sumoProgramEnv(gym.Env):
 
         # Example for discrete action space
         self.action_field = spaces.Discrete(6)
-
-        # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
-        # one phase:['abcdefgh']
-        program_0 = ['rrggrrgg',
-                     'ggrrggrr'] * 12
-
-        program_1 = ['grrrgrrr',
-                     'rgrrrgrr',
-                     'rrgrrrgr',
-                     'rrrgrrrg'] * 6
-
-        program_2 = ['grrrgrrr',
-                     'ggrrggrr',
-                     'rgrrrgrr',
-                     'rrgrrrgr',
-                     'rrggrrgg',
-                     'rrrgrrrg'] * 4
-
-        program_3 = ['grrrgrrr',
-                     'ggrrggrr',
-                     'rrgrrrgr',
-                     'rrggrrgg'] * 6
-
-        program_4 = ['ggrrggrr',
-                     'rgrrrgrr',
-                     'rrgrrrgr',
-                     'rrggrrgg'] * 6
-
-        program_5 = ['grrrrrrr',
-                     'rgrrrrrr',
-                     'rrgrrrrr',
-                     'rrrgrrrr',
-                     'rrrrgrrr',
-                     'rrrrrgrr',
-                     'rrrrrrgr',
-                     'rrrrrrrg'] * 3
-
-        self.programs = [program_0,
-                         program_1,
-                         program_2,
-                         program_3,
-                         program_4,
-                         program_5]
-
+        self.programs = PROGRAM_ACTIONS
         self.action_space = [np.array([state_to_array(state)
                                        for state in program])
                              for program in self.programs]
-        # Example action
-        # pp( f'action {i}: {self.action_space[self.action_field.sample()]}')
 
         # TODO Define the Observational space
         # This is supposed to be an instatiation of a sumo simulation, along
         # with the handle of a valid traci active connection
+
+        # FIXME: Right now it's same as the Duration Agent
         pp('Program Environement instatiated')
 
     def step(self, action):
@@ -164,9 +177,9 @@ class sumoProgramEnv(gym.Env):
         # while carefully using the corresponding RL scope (horizon necessary
         # for calculating the reward)
 
-        self.TcLt_simulation.SimulateDuration(self.action_space[action])
-        # the step uses the traci handle to excecute the action
-        pass
+        reward, observation_, done, info = \
+            self.TcLt_simulation.SimulateDuration(self.action_space[action])
+        return observation_, reward, done, info
 
     def reset(self):
 
@@ -178,4 +191,3 @@ class sumoProgramEnv(gym.Env):
         # TODO OPTIONAL: Use sumo-gui to display the simulation for a
         # particular window of time
         pass
-
