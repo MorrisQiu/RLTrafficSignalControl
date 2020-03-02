@@ -87,12 +87,14 @@ class Env_TLC:
         # sumoBinary = checkBinary('sumo-gui')
         generate_routefile()
 
-        self.Simulation_args = [sumoBinary, "-c", "../../data/road.sumocfg",
-                             '-l', '../../data/log.xml',
-                             '--message-log', '../../messages.xml',
-                             '--error-log', '../../errors.xml',
-                            ]
-        self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
+        self.Simulation_args = [sumoBinary,
+                                "-c", "../../data/road.sumocfg",
+                                '-l', '../../data/log.xml',
+                                '--message-log', '../../messages.xml',
+                                '--error-log', '../../errors.xml'
+                                ]
+        self.Restart_args = [sumoBinary,
+                             '-c', '../../data/road.sumocfg',
                              '--load-state', 'test_save_state.xml',
                              '-l', '../../data/log.xml',
                              '--message-log', '../../messages.xml',
@@ -103,7 +105,6 @@ class Env_TLC:
     --message-log FILE                   Writes all non-error messages to FILE
     --error-log FILE                     Writes all warnings and errors to FILE
         '''
-
 
         traci.start(self.Simulation_args)
         Sim.saveState('test_save_state.xml')
@@ -168,8 +169,8 @@ class Env_TLC:
         # Query for Starting Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
                      for lane_area in OBDetectors]:
-                for ID in each:
-                    Starting_VehIDs.append(ID)
+            for ID in each:
+                Starting_VehIDs.append(ID)
 
         # Query for Total Vehicles in OBDetector Areas
         for _ in range(seconds):
@@ -183,8 +184,8 @@ class Env_TLC:
         # Query for remaining Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
                      for lane_area in OBDetectors]:
-                for ID in each:
-                    Current_VehIDs.append(ID)
+            for ID in each:
+                Current_VehIDs.append(ID)
         return len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
 
     def SimulateDuration(self, duration):
@@ -223,3 +224,38 @@ class Env_TLC:
             traci.simulationStep()
         self.updateLastState()
         return self.getStateArray()
+
+    def BuildNetwork(self,):
+        ''' Generate the routes as per the initial conditions passed in
+        traffic_conditions, and loads them to the connected SUMo simulation'''
+
+        pass
+
+    def SumoStart(self,):
+        ''' Starts the simluartion using the appropriate binary (sumo or
+        sumo-gui) if not already started.'''
+
+        pass
+
+    def ContinuousResetSimulation(self,):
+        ''' Brings the time index to the decision making point while keeping
+        track of the observation space values.'''
+
+        measured_window = 0
+        continuous_observations = {}
+        # initialize reward observations
+        for each in self.last_state.keys():
+            continuous_observations[each] = []
+        Next_Switch = TL.getNextSwitch(self.ID)
+        while traci.simulation.getTime() < Next_Switch:
+            traci.simulationStep()
+            measured_window += 1
+            self.updateLastState()
+            for each in self.last_state.keys():
+                # TODO: Append last_state values to continuous_observations
+                continuous_observations[each].append(
+                    state_to_array(self.last_state[each]))
+
+        # TODO: Average the continuous_observations over the measured_window
+
+        return continuous_observations
