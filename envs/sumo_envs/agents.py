@@ -99,7 +99,7 @@ class sumoDurationEnv(gym.Env):
             programID='0',
             tlsID=tlID)
 
-        self.TcLt_simulation.ResetSimulation()
+        # self.TcLt_simulation.ContinuousResetSimulation()
 
         # 'IBOccupancy' (1 x 8)
         # 'IBVolume' (1 x 8)
@@ -131,8 +131,7 @@ class sumoDurationEnv(gym.Env):
         Reset the simulation state to the next decision making timestep
         '''
 
-        observation = self.TcLt_simulation.ContinuousResetSimulation()
-        return observation
+        return self.TcLt_simulation.ContinuousResetSimulation()
 
     def render(self, mode='human', close=False):
 

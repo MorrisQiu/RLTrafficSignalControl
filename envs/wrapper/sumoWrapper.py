@@ -117,19 +117,27 @@ class Env_TLC:
         self.lanes = TL.getControlledLanes(self.ID)
         self.links = TL.getControlledLinks(tlsID)
         self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)[0]
-        self.last_state = {}
-
         self.IBlaneList = [self.links[i][0][0]for i in range(len(self.links))]
         self.OBlaneList = [self.links[i][0][1]for i in range(len(self.links))]
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
+        self.last_state = {}
+        self.updateLastState()
+        self.continuous_observations = {}
+        for each in self.last_state.keys():
+            self.continuous_observations[each] = []
 
-    def getStateArray(self, ):
-        observation = np.row_stack((
-            [np.array(each) for each in self.last_state.values()],
-            self.program_sequence,
-            state_to_array(self.Current_Phase_State)
-        ))
-        return observation
+    def getStateArray(self, obs_dict=None):
+        ''' Function that creates the observation state as an np.array from
+        three componenents: Traffic_obs, Current Program sequence and Current
+        Phase.'''
+
+        if obs_dict is None:
+            obs_dict = {None: None}
+            print('No value passed to getStateArray')
+        traffic = np.array([each for each in obs_dict.values()])
+        program = self.program_sequence
+        current_phase = state_to_array(self.Current_Phase_State)
+        return np.row_stack((traffic, program, current_phase))
 
     def updateLastState(self, ):
 
@@ -162,6 +170,7 @@ class Env_TLC:
         return
 
     def StepAndCalculate(self, seconds, lane_areas=[]):
+        done = 0
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
@@ -181,17 +190,23 @@ class Env_TLC:
                         Total_VehIDs.append(ID)
             traci.simulationStep()
 
+        sim_time_index = traci.simulation.getTime()
+        done = sim_time_index >= 3600
+
         # Query for remaining Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
                      for lane_area in lane_areas]:
             for ID in each:
                 Current_VehIDs.append(ID)
-        return len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
+
+        vehicles_that_left = (
+            len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
+        )
+        return vehicles_that_left, done
 
     def SimulateDuration(self, duration):
         # current_time = traci.getTime()
         reward = -300
-        done = 1
         reward_measurement_period = 120
         lane_areas = La.getIDList()
 
@@ -199,7 +214,7 @@ class Env_TLC:
         self.RYG_definition.\
             getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
 
-        nbr_Veh_left_OB = self.StepAndCalculate(
+        nbr_Veh_left_OB, done = self.StepAndCalculate(
             reward_measurement_period,
             lane_areas)
 
@@ -210,7 +225,8 @@ class Env_TLC:
         # reward = (total flow of cars - sigmoid(total_waiting_time)) / action
 
         self.updateLastState()
-        observation_ = self.getStateArray()
+        # observation_ = self.getStateArray(obs_dict=self.last_state)
+        observation_ = self.getContinuousObservations()
 
         info = {}  # TODO
 
@@ -223,7 +239,7 @@ class Env_TLC:
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
         self.updateLastState()
-        return self.getStateArray()
+        return self.getStateArray(obs_dict=self.last_state)
 
     def BuildNetwork(self,):
         ''' Generate the routes as per the initial conditions passed in
@@ -237,7 +253,17 @@ class Env_TLC:
 
         pass
 
-    def ContinuousResetSimulation(self,):
+    def cummulateObservations(self, ):
+        ''' Appends each step's observations to the current cummulative
+        observations.'''
+
+        for each in self.last_state.keys():
+            self.continuous_observations[each].append(
+                np.array(self.last_state[each]))
+
+        return
+
+    def getContinuousObservations(self, ):
         ''' Brings the time index to the decision making point while keeping
         track of the observation space values.'''
 
@@ -248,15 +274,18 @@ class Env_TLC:
         Next_Switch = TL.getNextSwitch(self.ID)
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
-            self.updateLastState()
-            for each in self.last_state.keys():
-                continuous_observations[each].append(
-                    state_to_array(self.last_state[each]))
+            self.cummulateObservations()
+            # self.updateLastState()
+            # for each in self.last_state.keys():
+                # continuous_observations[each].append(
+                    # np.array(self.last_state[each]))
 
-        # TODO: Average the continuous_observations over the measured_window
         for each in continuous_observations.keys():
             continuous_observations[each] = np.array(
                 continuous_observations[each]).mean(axis=0)
+        return self.getStateArray(obs_dict=continuous_observations)
 
-        # TODO: Add full program and current phase
-        return continuous_observations
+    def ContinuousResetSimulation(self,):
+        ''' Returns getContinuousObservations() result '''
+
+        return self.getContinuousObservations()
