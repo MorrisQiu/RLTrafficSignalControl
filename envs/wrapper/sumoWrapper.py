@@ -241,7 +241,6 @@ class Env_TLC:
         ''' Brings the time index to the decision making point while keeping
         track of the observation space values.'''
 
-        measured_window = 0
         continuous_observations = {}
         # initialize reward observations
         for each in self.last_state.keys():
@@ -249,13 +248,14 @@ class Env_TLC:
         Next_Switch = TL.getNextSwitch(self.ID)
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
-            measured_window += 1
             self.updateLastState()
             for each in self.last_state.keys():
-                # TODO: Append last_state values to continuous_observations
                 continuous_observations[each].append(
                     state_to_array(self.last_state[each]))
 
         # TODO: Average the continuous_observations over the measured_window
+        for each in continuous_observations.keys():
+            continuous_observations[each] = np.array(
+                continuous_observations[each]).mean(axis=0)
 
         return continuous_observations
