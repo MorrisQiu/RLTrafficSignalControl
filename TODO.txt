@@ -1,12 +1,16 @@
-(A) 2020-02-27 RLTrafficSignalControl Implement Reward and Observations for ProgramAgent
-(A) 2020-02-27 RLTrafficSignalControl Implement continuous training
-(A) 2020-02-27 RLTrafficSignalControl Generate realistic route file exhausting all traffic conditions
-(A) 2020-02-27 RLTrafficSignalControl Implement check-pointing of trained models
-2020-02-27 RLTrafficSignalControl Explore parallel training
-(A) 2020-02-27 RLTrafficSignalControl Import OpenStreetMap (Sheppard & MeadowVale Pilot area) into SUMo
-2020-02-27 RLTrafficSignalControl Leverage RamDisk Capabilities to speed-up interactions with XML files
-2020-02-27 RLTrafficSignalControl Suppress all outputs from SUMo & TraCI
-2020-02-27 RLTrafficSignalControl Redirect all SUMo & TraCI outputs to RamDisk files
-2020-02-27 RLTrafficSignalControl Try different NeuNet Architectures
-2020-02-27 RLTrafficSignalControl Implement Network Agent Helper Code
-2020-02-27 RLTrafficSignalControl Re-factor Reward, Observation & Simulation Logic
+# TODO
+(A) 2020-03-01 +RLTrafficSignalControl Find how to generate realistic demand for the Sheppard_Meadowvale Simulation
+(A) 2020-02-27 +RLTrafficSignalControl Implement Reward and Observations for ProgramAgent
+(A) 2020-02-27 +RLTrafficSignalControl Implement continuous training
+(A) 2020-02-27 +RLTrafficSignalControl Generate realistic route file exhausting all traffic conditions
+(A) 2020-02-27 +RLTrafficSignalControl Implement check-pointing of trained models
+(B) 2020-02-27 +RLTrafficSignalControl Suppress all outputs from SUMo & TraCI
+(B) 2020-02-27 +RLTrafficSignalControl Leverage RamDisk Capabilities to speed-up interactions with XML files
+(B) 2020-02-27 +RLTrafficSignalControl Try different NeuNet Architectures
+(C) 2020-02-27 +RLTrafficSignalControl Implement Network Agent Helper Code
+(C) 2020-02-27 +RLTrafficSignalControl Explore parallel training
+(C) 2020-02-27 +RLTrafficSignalControl Re-factor Reward, Observation & Simulation Logic
+(C) 2020-03-01 +RLTrafficSignalControl Explore the possibility to do inference on live data
+
+# DONE
+x (A) 2020-02-27 +RLTrafficSignalControl Import OpenStreetMap (Sheppard & MeadowVale Pilot area) into SUMo

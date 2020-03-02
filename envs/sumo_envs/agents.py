@@ -131,7 +131,7 @@ class sumoDurationEnv(gym.Env):
         Reset the simulation state to the next decision making timestep
         '''
 
-        observation = self.TcLt_simulation.ResetSimulation()
+        observation = self.TcLt_simulation.ContinuousResetSimulation()
         return observation
 
     def render(self, mode='human', close=False):

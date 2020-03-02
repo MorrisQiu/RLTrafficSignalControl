@@ -161,21 +161,21 @@ class Env_TLC:
         TL.setPhase(self.ID, phase_index)
         return
 
-    def StepAndCalculate(self, seconds, OBDetectors=[]):
+    def StepAndCalculate(self, seconds, lane_areas=[]):
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
 
         # Query for Starting Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
-                     for lane_area in OBDetectors]:
+                     for lane_area in lane_areas]:
             for ID in each:
                 Starting_VehIDs.append(ID)
 
         # Query for Total Vehicles in OBDetector Areas
         for _ in range(seconds):
             for each in [list(La.getLastStepVehicleIDs(lane_area))
-                         for lane_area in OBDetectors]:
+                         for lane_area in lane_areas]:
                 for ID in each:
                     if ID not in Total_VehIDs:
                         Total_VehIDs.append(ID)
@@ -183,7 +183,7 @@ class Env_TLC:
 
         # Query for remaining Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
-                     for lane_area in OBDetectors]:
+                     for lane_area in lane_areas]:
             for ID in each:
                 Current_VehIDs.append(ID)
         return len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
@@ -192,7 +192,7 @@ class Env_TLC:
         # current_time = traci.getTime()
         reward = -300
         done = 1
-        reward_period = 120
+        reward_measurement_period = 120
         lane_areas = La.getIDList()
 
         self.current_phase_duration = TL.getPhaseDuration(self.ID)
@@ -200,7 +200,7 @@ class Env_TLC:
             getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
 
         nbr_Veh_left_OB = self.StepAndCalculate(
-            reward_period,
+            reward_measurement_period,
             lane_areas)
 
         Total_Waiting_Times = [Ln.getWaitingTime(lane) for
@@ -258,4 +258,5 @@ class Env_TLC:
             continuous_observations[each] = np.array(
                 continuous_observations[each]).mean(axis=0)
 
+        # TODO: Add full program and current phase
         return continuous_observations
