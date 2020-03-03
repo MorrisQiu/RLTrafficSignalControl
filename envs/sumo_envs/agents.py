@@ -128,8 +128,11 @@ class sumoDurationEnv(gym.Env):
 
     def reset(self):
         '''
-        Reset the simulation state to the next decision making timestep
+        Reset the simulation after the episode is finished. The whole simulation
+        is reset to it's starting condition.
         '''
+
+        # FIXME: should be traci.stop() traci.start() & traci.load()
 
         return self.TcLt_simulation.ContinuousResetSimulation()
 

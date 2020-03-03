@@ -38,6 +38,7 @@ def generate_routefile():
     pWB = 1. / 11
     pSB = 1. / 15
     pNB = 1. / 25
+
     with open("../../data/road.rou.xml", "w") as routes:
         print("""<routes>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
@@ -51,25 +52,22 @@ def generate_routefile():
         <route id="NorthBound" edges="S-0S 0S-0 0-0N 0N-N" />""", file=routes)
         vehNr = 0
         for i in range(N):
+            red_color = 'color="1,0,0"'
+            est_string = f'    <vehicle id="EastBound_{vehNr}" type="typeWE" route="EastBound" depart="{i}" />' #  noqa: E501
+            wst_string = f'    <vehicle id="WestBound_{vehNr}" type="typeWE" route="WestBound" depart="{i}" />' #  noqa: E501
+            sth_string = f'    <vehicle id="SouthBound_{vehNr}" type="typeNS" route="SouthBound" depart="{i}" {red_color}/>' #  noqa: E501
+            nth_string = f'    <vehicle id="NorthBound_{vehNr}" type="typeNS" route="NorthBound" depart="{i}" {red_color}/>' #  noqa: E501
             if random.uniform(0, 1) < pEB:
-                print('    <vehicle id="EastBound_%i" type="typeWE" \
-                      route="EastBound" depart="%i" />' \
-                      % (vehNr, i), file=routes)
+                print(est_string, file=routes)
                 vehNr += 1
             if random.uniform(0, 1) < pWB:
-                print('    <vehicle id="WestBound_%i" type="typeWE" \
-                      route="WestBound" depart="%i" />' \
-                      % (vehNr, i), file=routes)
+                print(wst_string, file=routes)
                 vehNr += 1
             if random.uniform(0, 1) < pSB:
-                print('    <vehicle id="SouthBound_%i" type="typeNS" \
-                      route="SouthBound" depart="%i" color="1,0,0"/>' \
-                      % (vehNr, i), file=routes)
+                print(sth_string, file=routes)
                 vehNr += 1
             if random.uniform(0, 1) < pNB:
-                print('    <vehicle id="NorthBound_%i" type="typeNS" \
-                      route="NorthBound" depart="%i" color="1,0,0"/>' \
-                      % (vehNr, i), file=routes)
+                print(nth_string, file=routes)
                 vehNr += 1
         print("</routes>", file=routes)
 
@@ -100,11 +98,11 @@ class Env_TLC:
                              '--message-log', '../../messages.xml',
                              '--error-log', '../../errors.xml'
                              ]
-        '''
+        """
     -l, --log FILE                       Writes all messages to FILE (implies
     --message-log FILE                   Writes all non-error messages to FILE
     --error-log FILE                     Writes all warnings and errors to FILE
-        '''
+        """
 
         traci.start(self.Simulation_args)
         Sim.saveState('test_save_state.xml')
@@ -116,20 +114,21 @@ class Env_TLC:
         self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
         self.lanes = TL.getControlledLanes(self.ID)
         self.links = TL.getControlledLinks(tlsID)
-        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)[0]
+        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)
         self.IBlaneList = [self.links[i][0][0]for i in range(len(self.links))]
         self.OBlaneList = [self.links[i][0][1]for i in range(len(self.links))]
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
         self.last_state = {}
-        self.updateLastState()
+        self.UpdateLastState()
         self.continuous_observations = {}
         for each in self.last_state.keys():
             self.continuous_observations[each] = []
+        self.UpdateContinuousOBS()
 
     def getStateArray(self, obs_dict=None):
-        ''' Function that creates the observation state as an np.array from
+        """ Function that creates the observation state as an np.array from
         three componenents: Traffic_obs, Current Program sequence and Current
-        Phase.'''
+        Phase."""
 
         if obs_dict is None:
             obs_dict = {None: None}
@@ -139,7 +138,7 @@ class Env_TLC:
         current_phase = state_to_array(self.Current_Phase_State)
         return np.row_stack((traffic, program, current_phase))
 
-    def updateLastState(self, ):
+    def UpdateLastState(self, ):
 
         self.last_state['IBOccupancy'] = [Ln.getLastStepOccupancy(
             laneID) for laneID in self.IBlaneList]
@@ -169,31 +168,46 @@ class Env_TLC:
         TL.setPhase(self.ID, phase_index)
         return
 
+    def ResetContinuousOBS(self, ):
+        """
+        Purge the continuous observations to start tracking new values.
+        """
+
+        for each in self.continuous_observations.keys():
+            self.continuous_observations[each] = []
+        return
+
+    def UpdateContinuousOBS(self, ):
+        """
+        Append the observations from the current simulation step into the array
+        """
+
+        self.UpdateLastState()
+        for each in self.continuous_observations.keys():
+            self.continuous_observations[each] = []
+        return
+
     def StepAndCalculate(self, seconds, lane_areas=[]):
-        done = 0
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
-
-        # Query for Starting Vehicles in OBDetector Areas
+        self.ResetContinuousOBS()
+        # Get list of Starting Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
                      for lane_area in lane_areas]:
             for ID in each:
                 Starting_VehIDs.append(ID)
-
-        # Query for Total Vehicles in OBDetector Areas
+        # Get list of Total Vehicles in OBDetector Areas
         for _ in range(seconds):
             for each in [list(La.getLastStepVehicleIDs(lane_area))
                          for lane_area in lane_areas]:
                 for ID in each:
                     if ID not in Total_VehIDs:
                         Total_VehIDs.append(ID)
+            self.UpdateContinuousOBS()
             traci.simulationStep()
 
-        sim_time_index = traci.simulation.getTime()
-        done = sim_time_index >= 3600
-
-        # Query for remaining Vehicles in OBDetector Areas
+        # Get list of remaining Vehicles in OBDetector Areas
         for each in [list(La.getLastStepVehicleIDs(lane_area))
                      for lane_area in lane_areas]:
             for ID in each:
@@ -202,31 +216,44 @@ class Env_TLC:
         vehicles_that_left = (
             len(Total_VehIDs) - len(Current_VehIDs) - len(Starting_VehIDs)
         )
-        return vehicles_that_left, done
+        return vehicles_that_left
 
     def SimulateDuration(self, duration):
         # current_time = traci.getTime()
         reward = -300
-        reward_measurement_period = 120
-        lane_areas = La.getIDList()
+        # reward_measurement_period = 120
+        detectors = La.getIDList()
 
-        self.current_phase_duration = TL.getPhaseDuration(self.ID)
-        self.RYG_definition.\
-            getPhases()[(self.CurrentPhase + 2) % 4].duration = duration
+        # self.current_phase_duration = TL.getPhaseDuration(self.ID)
+        self.RYG_definition[0].getPhases()[
+            (self.CurrentPhase + 2) % 4].duration = duration
+        traci.setCompleteRedYellowGreenDefinition(
+            self.ID,
+            self.RYG_definition
+        )
 
-        nbr_Veh_left_OB, done = self.StepAndCalculate(
-            reward_measurement_period,
-            lane_areas)
+        nbr_Veh_left_OB = self.StepAndCalculate(
+            seconds=duration,
+            lane_areas=detectors)
+
+        sim_time_index = traci.simulation.getTime()
+        done = sim_time_index >= 3600
 
         Total_Waiting_Times = [Ln.getWaitingTime(lane) for
                                lane in self.IBlaneList]
 
-        reward = (nbr_Veh_left_OB / duration) - sum(Total_Waiting_Times)
+        reward = (nbr_Veh_left_OB - sum(Total_Waiting_Times)) / duration
         # reward = (total flow of cars - sigmoid(total_waiting_time)) / action
 
-        self.updateLastState()
+        # self.UpdateLastState()
         # observation_ = self.getStateArray(obs_dict=self.last_state)
-        observation_ = self.getContinuousObservations()
+        # observation_ = self.getContinuousObservations()
+        for each in self.continuous_observations.keys():
+            self.continuous_observations[each] = np.array(
+                self.continuous_observations[each].mean(axis=0)
+            )
+        observation_ = self.getStateArray(
+            obs_dict=self.continuous_observations)
 
         info = {}  # TODO
 
@@ -238,24 +265,24 @@ class Env_TLC:
         Next_Switch = TL.getNextSwitch(self.ID)
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
-        self.updateLastState()
+        self.UpdateLastState()
         return self.getStateArray(obs_dict=self.last_state)
 
     def BuildNetwork(self,):
-        ''' Generate the routes as per the initial conditions passed in
-        traffic_conditions, and loads them to the connected SUMo simulation'''
+        """ Generate the routes as per the initial conditions passed in
+        traffic_conditions, and loads them to the connected SUMo simulation"""
 
         pass
 
     def SumoStart(self,):
-        ''' Starts the simluartion using the appropriate binary (sumo or
-        sumo-gui) if not already started.'''
+        """ Starts the simluartion using the appropriate binary (sumo or
+        sumo-gui) if not already started."""
 
         pass
 
     def cummulateObservations(self, ):
-        ''' Appends each step's observations to the current cummulative
-        observations.'''
+        """ Appends each step's observations to the current cummulative
+        observations."""
 
         for each in self.last_state.keys():
             self.continuous_observations[each].append(
@@ -264,8 +291,8 @@ class Env_TLC:
         return
 
     def getContinuousObservations(self, ):
-        ''' Brings the time index to the decision making point while keeping
-        track of the observation space values.'''
+        """ Brings the time index to the decision making point while keeping
+        track of the observation space values."""
 
         self.continuous_observations = {}
         # initialize reward observations
@@ -275,10 +302,10 @@ class Env_TLC:
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
             self.cummulateObservations()
-            # self.updateLastState()
+            # self.UpdateLastState()
             # for each in self.last_state.keys():
-                # continuous_observations[each].append(
-                    # np.array(self.last_state[each]))
+            #     continuous_observations[each].append(
+            #         np.array(self.last_state[each]))
 
         for each in self.continuous_observations.keys():
             self.continuous_observations[each] = np.array(
@@ -286,6 +313,6 @@ class Env_TLC:
         return self.getStateArray(obs_dict=self.continuous_observations)
 
     def ContinuousResetSimulation(self,):
-        ''' Returns getContinuousObservations() result '''
+        """ Returns getContinuousObservations() result """
 
         return self.getContinuousObservations()
