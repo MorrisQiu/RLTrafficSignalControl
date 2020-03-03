@@ -267,10 +267,10 @@ class Env_TLC:
         ''' Brings the time index to the decision making point while keeping
         track of the observation space values.'''
 
-        continuous_observations = {}
+        self.continuous_observations = {}
         # initialize reward observations
         for each in self.last_state.keys():
-            continuous_observations[each] = []
+            self.continuous_observations[each] = []
         Next_Switch = TL.getNextSwitch(self.ID)
         while traci.simulation.getTime() < Next_Switch:
             traci.simulationStep()
@@ -280,10 +280,10 @@ class Env_TLC:
                 # continuous_observations[each].append(
                     # np.array(self.last_state[each]))
 
-        for each in continuous_observations.keys():
-            continuous_observations[each] = np.array(
-                continuous_observations[each]).mean(axis=0)
-        return self.getStateArray(obs_dict=continuous_observations)
+        for each in self.continuous_observations.keys():
+            self.continuous_observations[each] = np.array(
+                self.continuous_observations[each]).mean(axis=0)
+        return self.getStateArray(obs_dict=self.continuous_observations)
 
     def ContinuousResetSimulation(self,):
         ''' Returns getContinuousObservations() result '''
