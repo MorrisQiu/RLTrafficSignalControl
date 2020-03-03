@@ -12,7 +12,7 @@ from pprint import pprint as pp
 import numpy as np
 import gym
 from gym import spaces
-import envs.wrapper.sumoWrapper as sumoWrapper
+import envs.wrapper.sumoWrapper as sumoWrapper #  noqa:W0611
 from envs.wrapper.sumoWrapper import Env_TLC
 from envs.wrapper.sumoWrapper import state_to_array
 
@@ -128,13 +128,11 @@ class sumoDurationEnv(gym.Env):
 
     def reset(self):
         '''
-        Reset the simulation after the episode is finished. The whole simulation
-        is reset to it's starting condition.
+        Reset the simulation after the episode is finished. The whole
+        simulation is reset to it's starting condition.
         '''
 
-        # FIXME: should be traci.stop() traci.start() & traci.load()
-
-        return self.TcLt_simulation.ContinuousResetSimulation()
+        return self.TcLt_simulation.ResetSimulation()
 
     def render(self, mode='human', close=False):
 
