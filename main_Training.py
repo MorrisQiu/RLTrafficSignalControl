@@ -32,6 +32,8 @@ if __name__ == '__main__':
                   'average score %.3f' % avg_score,
                   'epsilon %.3f' % brain.epsilon)
         else:
+            print("\033[F")
+            print("\033[F")
             print('episode', i, ' score', score)
         eps_history.append(brain.epsilon)
         done = False

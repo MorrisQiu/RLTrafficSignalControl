@@ -6,6 +6,7 @@ Created on Tue Feb 11 13:40:29 2020
 """
 
 import os
+import subprocess
 import sys
 import random
 import numpy as np
@@ -21,6 +22,7 @@ else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
 # import traci.constants as tc
+import sumolib  # noqa: E402
 from sumolib import checkBinary  # noqa: E402
 import traci  # noqa: E402, F401
 from traci import trafficlight as TL  # noqa: E402
@@ -28,6 +30,9 @@ from traci import lane as Ln  # noqa: E402
 from traci import simulation as Sim  # noqa: E402, F401
 from traci import lanearea as La  # noqa: E402, F401
 from traci import constants as C  # noqa: E402, F401
+
+BINARY = checkBinary('sumo')
+# BINARY = checkBinary('sumo-gui')
 
 
 def generate_routefile():
@@ -81,28 +86,31 @@ class Env_TLC:
 
     def __init__(self, program_sequence, programID, tlsID, restart=False):
 
-        sumoBinary = checkBinary('sumo')
-        # sumoBinary = checkBinary('sumo-gui')
+        sumoBinary = BINARY
+
         generate_routefile()
 
         self.start_args = [sumoBinary,
-                           "-c", "../../data/road.sumocfg",
+                           '-c', '../../data/road.sumocfg',
                            '-l', '../../data/log.xml',
                            '--message-log', '../../messages.xml',
-                           '--error-log', '../../errors.xml'
+                           '--error-log', '../../errors.xml',
+                           '-W', 'true',
+                           '--no-step-log', 'true',
+                           '-S', 'true',
+                           '--duration-log.disable', 'true'
                            ]
         self.Restart_args = [sumoBinary,
-                             '-c', '../../data/road.sumocfg',
                              '--load-state', 'test_save_state.xml',
+                             '-c', '../../data/road.sumocfg',
                              '-l', '../../data/log.xml',
                              '--message-log', '../../messages.xml',
-                             '--error-log', '../../errors.xml'
+                             '--error-log', '../../errors.xml',
+                             '-W', 'true',
+                             '--no-step-log', 'true',
+                             '-S', 'true',
+                             '--duration-log.disable', 'true'
                              ]
-        """
-    -l, --log FILE                       Writes all messages to FILE (implies
-    --message-log FILE                   Writes all non-error messages to FILE
-    --error-log FILE                     Writes all warnings and errors to FILE
-        """
 
         if restart:
             traci.start(self.Restart_args)
@@ -114,14 +122,15 @@ class Env_TLC:
         self.ID = tlsID
         self.programID = programID
         self.program_sequence = program_sequence
-        self.CurrentPhase = TL.getPhase(self.ID)
-        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
         self.lanes = TL.getControlledLanes(self.ID)
-        self.links = TL.getControlledLinks(tlsID)
-        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(tlsID)
+        self.links = TL.getControlledLinks(self.ID)
         self.IBlaneList = [self.links[i][0][0]for i in range(len(self.links))]
         self.OBlaneList = [self.links[i][0][1]for i in range(len(self.links))]
         self.linkList = [self.links[i][0][2]for i in range(len(self.links))]
+
+        self.CurrentPhase = TL.getPhase(self.ID)
+        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
+        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(self.ID)
         self.last_state = {}
         self.UpdateLastState()
         self.continuous_observations = {}
@@ -164,8 +173,10 @@ class Env_TLC:
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBWaitingTime'] = [Ln.getWaitingTime(
             laneID) for laneID in self.OBlaneList]
-        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
+
         self.CurrentPhase = TL.getPhase(self.ID)
+        self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
+        self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(self.ID)
 
     def ChangePhase(self, phase_index):
         TL.setPhase(self.ID, phase_index)
@@ -196,8 +207,10 @@ class Env_TLC:
         """ Plays the simulation for the whole chosen duration of the next
         light phase and keeps track of the new observations for the next
         decision making point. """
+        while 'y' in self.Current_Phase_State:
+            traci.simulationStep()
+            self.UpdateLastState()
 
-        traci.simulationStep()
         Starting_VehIDs = []
         Total_VehIDs = []
         Current_VehIDs = []
@@ -240,7 +253,7 @@ class Env_TLC:
         reward = -300
         # reward_measurement_period = 120
         detectors = La.getIDList()
-
+        self.UpdateLastState()
         # self.current_phase_duration = TL.getPhaseDuration(self.ID)
         self.RYG_definition[0].getPhases()[
             (self.CurrentPhase + 2) % 4].duration = duration
@@ -248,8 +261,12 @@ class Env_TLC:
             self.ID,
             self.RYG_definition[0]
         )
+        traci.simulationStep()
+        self.UpdateLastState()
 
-        nbr_Veh_left_OB = self.StepAndCalculate(lane_areas=detectors)
+        nbr_Veh_left_OB = self.StepAndCalculate(
+            lane_areas=detectors
+        )
 
         sim_time_index = traci.simulation.getTime()
         done = sim_time_index >= 3600
