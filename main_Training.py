@@ -1,9 +1,9 @@
 import gym
-import envs
+import envs  # noqa: w0611
 from RL_ModelImplementations import Agent
 import numpy as np
 
-NBR_GAMES = 20_000
+NBR_GAMES = 30
 OBSERVATIONS_SIZE = 35 * 8
 NBR_ACTIONS = 8
 BATCH_SIZE = 64
