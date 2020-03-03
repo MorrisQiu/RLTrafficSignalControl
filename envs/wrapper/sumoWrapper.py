@@ -2,14 +2,18 @@
 """
 Created on Tue Feb 11 13:40:29 2020
 
-@author: morris qiu
+@authors: morris qiu, Sehail Fillali
 """
 
 import os
-import subprocess
+import subprocess  # noqa
 import sys
 import random
 import numpy as np
+from main_Training import (
+    RENDER_SIM, DATA_PATH, CONFIG_FILE, ROUTE_FILE, STATE_FILE, LOG_FILE,
+    MESSAGE_FILE, ERROR_FILE
+)
 
 from helper import state_to_array
 
@@ -31,11 +35,16 @@ from traci import simulation as Sim  # noqa: E402, F401
 from traci import lanearea as La  # noqa: E402, F401
 from traci import constants as C  # noqa: E402, F401
 
-BINARY = checkBinary('sumo')
-# BINARY = checkBinary('sumo-gui')
+sumoBinary   = checkBinary('sumo-gui') if RENDER_SIM else checkBinary('sumo')
+config_path  = os.path.join(DATA_PATH, CONFIG_FILE)
+route_path   = os.path.join(DATA_PATH, ROUTE_FILE)
+state_path   = os.path.join(DATA_PATH, STATE_FILE)
+log_path     = os.path.join(DATA_PATH, LOG_FILE)
+message_path = os.path.join(DATA_PATH, MESSAGE_FILE)
+error_path   = os.path.join(DATA_PATH, ERROR_FILE)
 
 
-def generate_routefile():
+def generate_routefile(route_file):
     random.seed(42)  # make tests reproducible
     N = 3600  # number of time steps
     # demand per second from different directions
@@ -44,7 +53,7 @@ def generate_routefile():
     pSB = 1. / 15
     pNB = 1. / 25
 
-    with open("../../data/road.rou.xml", "w") as routes:
+    with open(route_file, "w") as routes:
         print("""<routes>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
               minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
@@ -86,38 +95,28 @@ class Env_TLC:
 
     def __init__(self, program_sequence, programID, tlsID, restart=False):
 
-        sumoBinary = BINARY
 
-        generate_routefile()
+        generate_routefile(route_path)
 
         self.start_args = [sumoBinary,
-                           '-c', '../../data/road.sumocfg',
-                           '-l', '../../data/log.xml',
-                           '--message-log', '../../messages.xml',
-                           '--error-log', '../../errors.xml',
+                           '-c', config_path,
+                           '-l', log_path,
+                           '--message-log', message_path,
+                           '--error-log', error_path,
                            '-W', 'true',
                            '--no-step-log', 'true',
                            '-S', 'true',
                            '--duration-log.disable', 'true'
                            ]
-        self.Restart_args = [sumoBinary,
-                             '--load-state', 'test_save_state.xml',
-                             '-c', '../../data/road.sumocfg',
-                             '-l', '../../data/log.xml',
-                             '--message-log', '../../messages.xml',
-                             '--error-log', '../../errors.xml',
-                             '-W', 'true',
-                             '--no-step-log', 'true',
-                             '-S', 'true',
-                             '--duration-log.disable', 'true'
-                             ]
+        # self.Restart_args = self.start_args + ['--load-state', state_path]
 
         if restart:
-            traci.start(self.Restart_args)
+            # traci.start(self.Restart_args)
+            traci.start(self.start_args + ['--load-state', state_path])
         else:
             traci.start(self.start_args)
 
-        Sim.saveState('test_save_state.xml')
+        Sim.saveState(state_path)
 
         self.ID = tlsID
         self.programID = programID
@@ -250,7 +249,7 @@ class Env_TLC:
         horizon has been reached."""
 
         # current_time = traci.getTime()
-        reward = -300
+        reward = 0
         # reward_measurement_period = 120
         detectors = La.getIDList()
         self.UpdateLastState()
