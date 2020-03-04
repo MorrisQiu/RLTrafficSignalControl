@@ -52,9 +52,9 @@ def generate_routefile():
     with open("../../data/road.rou.xml", "w") as routes:
         print("""<routes>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
-              minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
+              minGap="2.5" maxSpeed="16.67" guiShape="passenger/wagon"/>
         <vType id="typeNS" accel="0.8" decel="4.5" sigma="0.5" length="7" \
-              minGap="3" maxSpeed="25" guiShape="bus"/>
+              minGap="3" maxSpeed="25" guiShape="passenger/van"/>
 
         <route id="EastBound" edges="W-0W 0W-0 0-0E 0E-E" />
         <route id="WestBound" edges="E-0E 0E-0 0-0W 0W-W" />
@@ -105,7 +105,8 @@ class Env_TLC:
                              "-W", "true",
                              "--no-step-log", "true",
                              "--duration-log.disable","true"
-                             #"-S","true"
+                             #"-S","true",
+                             #"--gui-settings-file", "road.settings.xml"
                              ]
         self.Restart_args = [sumoBinary, '-c', '../../data/road.sumocfg',
                              '--load-state', 'test_save_state.xml',
@@ -127,6 +128,7 @@ class Env_TLC:
     --duration-log.disable <BOOL>	Disable performance reports for individual simulation steps; default: false
     GUI only:
     -S <BOOL> --start <BOOL>	Start the simulation after loading; default: false
+    -g <FILE> --gui-settings-file <FILE>	Load visualisation settings from FILE
         '''
 
 
