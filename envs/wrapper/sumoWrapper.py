@@ -25,7 +25,6 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
-# import traci.constants as tc
 import sumolib  # noqa: E402
 from sumolib import checkBinary  # noqa: E402
 import traci  # noqa: E402, F401
@@ -35,13 +34,13 @@ from traci import simulation as Sim  # noqa: E402, F401
 from traci import lanearea as La  # noqa: E402, F401
 from traci import constants as C  # noqa: E402, F401
 
-sumoBinary   = checkBinary('sumo-gui') if RENDER_SIM else checkBinary('sumo')
-config_path  = os.path.join(DATA_PATH, CONFIG_FILE)
-route_path   = os.path.join(DATA_PATH, ROUTE_FILE)
-state_path   = os.path.join(DATA_PATH, STATE_FILE)
-log_path     = os.path.join(DATA_PATH, LOG_FILE)
+sumoBinary = checkBinary('sumo-gui') if RENDER_SIM else checkBinary('sumo')
+config_path = os.path.join(DATA_PATH, CONFIG_FILE)
+route_path = os.path.join(DATA_PATH, ROUTE_FILE)
+state_path = os.path.join(DATA_PATH, STATE_FILE)
+log_path = os.path.join(DATA_PATH, LOG_FILE)
 message_path = os.path.join(DATA_PATH, MESSAGE_FILE)
-error_path   = os.path.join(DATA_PATH, ERROR_FILE)
+error_path = os.path.join(DATA_PATH, ERROR_FILE)
 
 
 def generate_routefile(route_file):
@@ -67,10 +66,10 @@ def generate_routefile(route_file):
         vehNr = 0
         for i in range(N):
             red_color = 'color="1,0,0"'
-            est_string = f'    <vehicle id="EastBound_{vehNr}" type="typeWE" route="EastBound" depart="{i}" />' #  noqa: E501
-            wst_string = f'    <vehicle id="WestBound_{vehNr}" type="typeWE" route="WestBound" depart="{i}" />' #  noqa: E501
-            sth_string = f'    <vehicle id="SouthBound_{vehNr}" type="typeNS" route="SouthBound" depart="{i}" {red_color}/>' #  noqa: E501
-            nth_string = f'    <vehicle id="NorthBound_{vehNr}" type="typeNS" route="NorthBound" depart="{i}" {red_color}/>' #  noqa: E501
+            est_string = f'    <vehicle id="EastBound_{vehNr}" type="typeWE" route="EastBound" depart="{i}" />'  # noqa: E501
+            wst_string = f'    <vehicle id="WestBound_{vehNr}" type="typeWE" route="WestBound" depart="{i}" />'  # noqa: E501
+            sth_string = f'    <vehicle id="SouthBound_{vehNr}" type="typeNS" route="SouthBound" depart="{i}" {red_color}/>'  # noqa: E501
+            nth_string = f'    <vehicle id="NorthBound_{vehNr}" type="typeNS" route="NorthBound" depart="{i}" {red_color}/>'  # noqa: E501
             if random.uniform(0, 1) < pEB:
                 print(est_string, file=routes)
                 vehNr += 1
@@ -87,15 +86,10 @@ def generate_routefile(route_file):
 
 
 class Env_TLC:
-    """
-    Class for Traffic Light Control Environment which is used for retrieving
-    State, changing the traffic phases or duration via TRACI API
-
-    """
+    """ Class for Traffic Light Control Environment which is used for retrieving
+    State, changing the traffic phases or duration via TRACI API"""
 
     def __init__(self, program_sequence, programID, tlsID, restart=False):
-
-
         generate_routefile(route_path)
 
         self.start_args = [sumoBinary,
@@ -176,10 +170,6 @@ class Env_TLC:
         self.CurrentPhase = TL.getPhase(self.ID)
         self.Current_Phase_State = TL.getRedYellowGreenState(self.ID)
         self.RYG_definition = TL.getCompleteRedYellowGreenDefinition(self.ID)
-
-    def ChangePhase(self, phase_index):
-        TL.setPhase(self.ID, phase_index)
-        return
 
     def ResetContinuousOBS(self, ):
         """
@@ -311,6 +301,10 @@ class Env_TLC:
         """ Generate the routes as per the initial conditions passed in
         traffic_conditions, and loads them to the connected SUMo simulation"""
         pass
+
+    def ChangePhase(self, phase_index):
+        TL.setPhase(self.ID, phase_index)
+        return
 
     def SumoStart(self,):
         """ Starts the simluartion using the appropriate binary (sumo or
