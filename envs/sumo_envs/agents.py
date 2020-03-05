@@ -111,6 +111,20 @@ class sumoDurationEnv(gym.Env):
 
         # self.TcLt_simulation.ContinuousResetSimulation()
 
+        OBS_indexForKey = {
+            'IBOccupancy': 1,
+            'IBVolume': 2,
+            'IBMeanSpeed': 3,
+            'IBQueuSize': 4,
+            'IBWaitingTime': 5,
+            'OBOccupancy': 6,
+            'OBVolume': 7,
+            'OBMeanSpeed': 8,
+            'OBQueuSize': 9,
+            'OBWaitingTime': 10,
+        }
+
+        # Full OBS input tensor
         # 'IBOccupancy' (1 x 8)
         # 'IBVolume' (1 x 8)
         # 'IBMeanSpeed' (1 x 8)
