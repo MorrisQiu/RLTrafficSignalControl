@@ -16,48 +16,58 @@ import envs.wrapper.sumoWrapper as sumoWrapper #  noqa:W0611
 from envs.wrapper.sumoWrapper import Env_TLC
 from envs.wrapper.sumoWrapper import state_to_array
 
-# Possible durations to be chosen from
-DURATION_ACTIONS = [7, 15, 25, 35, 50, 70, 90, 120]
 
-# Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
-# one phase:['abcdefgh'] each letter is one lane (right on red lanes are
-# ignored)
-program_0 = ['rrggrrgg',
-             'ggrrggrr'] * 12
+def PrepareConstants():
+    global DURATION_ACTIONS, PROGRAM_ACTIONS
+    # Possible durations to be chosen from
+    DURATION_ACTIONS = [7, 15, 25, 35, 50, 70, 90, 120]
 
-program_1 = ['grrrgrrr',
-             'rgrrrgrr',
-             'rrgrrrgr',
-             'rrrgrrrg'] * 6
+    # Full program for the traffic light: {'r': 0, 'y': 1, 'g' : 2, 'G': 3}
+    # one phase:['abcdefgh'] each letter is one lane (right on red lanes are
+    # ignored)
+    program_0 = ['rrggrrgg',
+                 'ggrrggrr'] * 12
 
-program_2 = ['grrrgrrr',
-             'ggrrggrr',
-             'rgrrrgrr',
-             'rrgrrrgr',
-             'rrggrrgg',
-             'rrrgrrrg'] * 4
+    program_1 = ['grrrgrrr',
+                 'rgrrrgrr',
+                 'rrgrrrgr',
+                 'rrrgrrrg'] * 6
 
-program_3 = ['grrrgrrr',
-             'ggrrggrr',
-             'rrgrrrgr',
-             'rrggrrgg'] * 6
+    program_2 = ['grrrgrrr',
+                 'ggrrggrr',
+                 'rgrrrgrr',
+                 'rrgrrrgr',
+                 'rrggrrgg',
+                 'rrrgrrrg'] * 4
 
-program_4 = ['ggrrggrr',
-             'rgrrrgrr',
-             'rrgrrrgr',
-             'rrggrrgg'] * 6
+    program_3 = ['grrrgrrr',
+                 'ggrrggrr',
+                 'rrgrrrgr',
+                 'rrggrrgg'] * 6
 
-program_5 = ['grrrrrrr',
-             'rgrrrrrr',
-             'rrgrrrrr',
-             'rrrgrrrr',
-             'rrrrgrrr',
-             'rrrrrgrr',
-             'rrrrrrgr',
-             'rrrrrrrg'] * 3
+    program_4 = ['ggrrggrr',
+                 'rgrrrgrr',
+                 'rrgrrrgr',
+                 'rrggrrgg'] * 6
 
-PROGRAM_ACTIONS = [program_0, program_1, program_2, program_3, program_4,
-                   program_5]
+    program_5 = ['grrrrrrr',
+                 'rgrrrrrr',
+                 'rrgrrrrr',
+                 'rrrgrrrr',
+                 'rrrrgrrr',
+                 'rrrrrgrr',
+                 'rrrrrrgr',
+                 'rrrrrrrg'] * 3
+
+    PROGRAM_ACTIONS = [program_0,
+                       program_1,
+                       program_2,
+                       program_3,
+                       program_4,
+                       program_5]
+
+
+PrepareConstants()
 
 
 class sumoDurationEnv(gym.Env):
