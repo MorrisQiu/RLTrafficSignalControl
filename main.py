@@ -1,4 +1,5 @@
 import gym
+import os
 from datetime import datetime as dt
 import argparse
 import envs  # noqa: w0611
@@ -30,7 +31,7 @@ def PrepareConstants():
     EPSILON = 1.0
     GAMMA = 0.99
     LEARNING_RATE = 0.0003
-    EPS_DECAY = 0.996
+    EPS_DECAY = 0.999996
     EPS_MIN = 0.01
 
     parser_descr = 'Simulation environement for training and using Deep QLearning  NeurNets to control traffic lights behaviour inside of SUMo'  # noqa
@@ -58,11 +59,11 @@ def PrepareConstants():
 PrepareConstants()
 
 
-def TrainOnDuration():
-    """ Trains only on the Duration Agent. The program used is a simple\
+def TrainOn(environement):
+    """ 'SumoDuration-vo' Trains only on the Duration Agent. The program used is a simple\
         ['GGrrGGrr', 'yyrryyrr', 'rrGGrrGG', 'rryyrryy'] sequence."""
 
-    env = gym.make('SumoDuration-v0')
+    env = gym.make(environement)
     brain = Agent(
         gamma=GAMMA,
         epsilon=EPSILON,
@@ -76,10 +77,17 @@ def TrainOnDuration():
     for i in range(NBR_GAMES):
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i-10):(i+1)])
+            checkpoint_path = os.path.join(
+                DATA_PATH,
+                str(round(dt.today().timestamp())) +\
+                '_{environement}_model_{str(score)}.pickle'
+            )
             brain.CheckPoint(
-                i,
-                str(round(dt.today().timestamp())) + '_duration_model.pickle'
-                    )
+                episode=i,
+                score=avg_score,
+                filepath=checkpoint_path
+            )
+
             print('episode', i, ' score', score,
                   'average score %.3f' % avg_score,
                   'epsilon %.3f' % brain.epsilon)
@@ -100,17 +108,16 @@ def TrainOnDuration():
         scores.append(score)
 
 
-def TrainOnProgram():
-    print('TrainOnProgram() is under construction')
-
-
 def TrainOnBoth():
     print('TrainOnBoth() is under construction')
 
 
 def InferenceLoop():
     print(' The inference loop is under Construction.')
-    print('Use "python main_Training.py -t to train')
+    print('Use "python main.py -t to train')
+
+    # DurationBrain = ''
+    # ProgramBrain = ''
 
 
 if __name__ == '__main__':
@@ -119,9 +126,9 @@ if __name__ == '__main__':
             TRAIN_ON_DURATION = True
             TrainOnBoth()
         elif ON.upper() == 'PROGRAM':
-            TrainOnProgram()
+            TrainOn('SumoProgram-v0')
             TRAIN_ON_DURATION = False
         elif ON.upper() == 'DURATION':
-            TrainOnDuration()
+            TrainOn('SumoDuration-v0')
     else:
         InferenceLoop()

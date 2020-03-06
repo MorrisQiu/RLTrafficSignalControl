@@ -117,10 +117,11 @@ class Agent(object):
             loss.backward()
             self.Q_eval.optimizer.step()
 
-    def CheckPoint(self, episode, filepath):
+    def CheckPoint(self, episode, score, filepath):
         '''Save the current state of the model in a pickled file '''
 
         state = {
+            'avg_score' : score,
             'episode': episode,
             'state': self.Q_eval.state_dict(),
             'optimizer': self.Q_eval.optimizer.state_dict()
