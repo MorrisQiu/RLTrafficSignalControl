@@ -39,7 +39,6 @@ config_path = os.path.join(DATA_PATH, CONFIG_FILE)
 route_path = os.path.join(DATA_PATH, ROUTE_FILE)
 state_path = os.path.join(DATA_PATH, STATE_FILE)
 log_path = os.path.join(DATA_PATH, LOG_FILE)
-import pudb; pudb.set_trace()  # XXX BREAKPOINT
 message_path = os.path.join(DATA_PATH, MESSAGE_FILE)
 error_path = os.path.join(DATA_PATH, ERROR_FILE)
 
@@ -97,7 +96,7 @@ class contiOBSListener(traci.StepListener):
     def step(self, t=0):
         self.UpdateLastState()
         self.AppendStateToOBSArray()
-        print(f'contiOBSListner called at {traci.simulation.getTime()} ms.', end='\r')  # noqa
+        print(f'contiOBSListner called at {traci.simulation.getTime()} s.', end='\r')  # noqa
 
         return True
 

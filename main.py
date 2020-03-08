@@ -1,4 +1,5 @@
 import gym
+# import torch as T
 import os
 from datetime import datetime as dt
 import argparse
@@ -12,7 +13,7 @@ def PrepareConstants():
     global DATA_PATH, ROUTE_FILE, CONFIG_FILE, STATE_FILE, LOG_FILE, EPS_MIN
     global MESSAGE_FILE, ERROR_FILE, RENDER_SIM, NBR_GAMES, OBSERVATIONS_SIZE
     global NBR_ACTIONS, BATCH_SIZE, EPSILON, GAMMA, LEARNING_RATE, EPS_DECAY
-    global TRAIN, ON
+    global TRAIN, ON, DURATION_MODEL_PATH
 
     TRAIN = False
     # ON = None
@@ -35,20 +36,20 @@ def PrepareConstants():
     EPS_MIN = 0.01
 
     parser_descr = 'Simulation environement for training and using Deep QLearning  NeurNets to control traffic lights behaviour inside of SUMo'  # noqa
-    render_descr = ' Use SUMo provided GUI (sumo-gui) to render the simulated environement'  # noqa
-    data_path_descr = 'Path of the SUMo config and various XML files. Also the path where the output data is dumped.'  # noqa
-    duration_model_path_descr = 'Load the Duration Agent pyTorch parameters from the supplied file path'  # noqa
-    program_model_path_descr = 'Load the Program Agent pyTorch parameters from the supplied file path'  # noqa
-    train_descr = 'Launches the training routine. If ommitted the inference routine is launched instead.'  # noqa
-    on_descr = 'Can be either "DURATION" or "PROGRAM". If ommitted will train both of them at the same time.'  # noqa
+    r_desc = 'Use SUMo provided GUI (sumo-gui) to render the simulated environement'  # noqa
+    d_desc = 'Path of the SUMo config and various XML files. Also the path where the output data is dumped.'  # noqa
+    D_desc = 'Load the Duration Agent pyTorch parameters from the supplied file path'  # noqa
+    P_desc = 'Load the Program Agent pyTorch parameters from the supplied file path'  # noqa
+    t_desc = 'Launches the training routine. If ommitted the inference routine is launched instead.'  # noqa
+    o_desc = 'Can be either "DURATION" or "PROGRAM". If ommitted will train both of them at the same time.'  # noqa
 
     parser = argparse.ArgumentParser(description=parser_descr)
-    parser.add_argument('-r', '--render_sim', action='store_true', help=render_descr)  # noqa
-    parser.add_argument('-d', '--data_path', type=str, default='./data/', help=data_path_descr)  # noqa
-    parser.add_argument('-P', '--program_model_path', type=str, help=program_model_path_descr)  # noqa
-    parser.add_argument('-D', '--duration_model_path', type=str, help=duration_model_path_descr)  # noqa
-    parser.add_argument('-t', '--train', action='store_true', help=train_descr)  # noqa
-    parser.add_argument('-o', '--on', choices=['duration', 'program'], help=on_descr)  # noqa
+    parser.add_argument('-r', '--render_sim', action='store_true', help=r_desc)  # noqa
+    parser.add_argument('-d', '--data_path', type=str, default='./data/', help=d_desc)  # noqa
+    parser.add_argument('-P', '--program_model_path', type=str, help=P_desc)  # noqa
+    parser.add_argument('-D', '--duration_model_path', type=str, help=D_desc)  # noqa
+    parser.add_argument('-t', '--train', action='store_true', help=t_desc)  # noqa
+    parser.add_argument('-o', '--on', choices=['duration', 'program'], help=o_desc)  # noqa
 
     args = parser.parse_args()
 
@@ -60,8 +61,8 @@ PrepareConstants()
 
 
 def TrainOn(environement):
-    """ 'SumoDuration-vo' Trains only on the Duration Agent. The program used is a simple\
-        ['GGrrGGrr', 'yyrryyrr', 'rrGGrrGG', 'rryyrryy'] sequence."""
+    """ 'SumoDuration-vo' Trains only on the Duration Agent. The program used
+    is a simple ['GGrrGGrr', 'yyrryyrr', 'rrGGrrGG', 'rryyrryy'] sequence."""
 
     env = gym.make(environement)
     brain = Agent(
@@ -75,13 +76,25 @@ def TrainOn(environement):
     eps_history = []
     score = 0
     for i in range(NBR_GAMES):
+        done = False
+        observation = env.reset()
+        score = 0
+        while not done:
+            action = brain.choose_action(observation.flatten())
+            observation_, reward, done, info = env.step(action)
+            score += reward
+            brain.store_transition(
+                observation.flatten(),
+                action, reward,
+                observation_.flatten(), done)
+            observation = observation_
+            brain.learn()
+        scores.append(score)
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i-10):(i+1)])
-            checkpoint_path = os.path.join(
-                DATA_PATH,
-                str(round(dt.today().timestamp())) +\
-                '_{environement}_model_{str(score)}.pickle'
-            )
+            filename = str(round(dt.today().timestamp())) +\
+                '_{environement}_model_{str(round(score))}.pickle'
+            checkpoint_path = os.path.join(DATA_PATH, filename)
             brain.CheckPoint(
                 episode=i,
                 score=avg_score,
@@ -94,21 +107,10 @@ def TrainOn(environement):
         else:
             print('episode', i, ' score', score)
         eps_history.append(brain.epsilon)
-        done = False
-        observation = env.reset()
-        score = 0
-        while not done:
-            action = brain.choose_action(observation.flatten())
-            observation_, reward, done, info = env.step(action)
-            score += reward
-            brain.store_transition(observation.flatten(), action, reward,
-                                   observation_.flatten(), done)
-            observation = observation_
-            brain.learn()
-        scores.append(score)
 
 
 def TrainOnBoth():
+
     print('TrainOnBoth() is under construction')
 
 
