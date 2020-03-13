@@ -6,9 +6,10 @@ import numpy as np
 
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, input_dims, fc1_dims,
-                 fc2_dims, fc3_dims, nbr_actions, loss_func=nn.MSELoss,
-                 optimizer=optim.Adam):
+    def __init__(self, lr, input_dims,
+                 fc1_dims, fc2_dims, fc3_dims,
+                 nbr_actions, loss_func=nn.MSELoss, optimizer=optim.Adam
+                 ):
         super(DeepQNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -49,10 +50,10 @@ class Agent(object):
         self.mem_cntr = 0
         self.Q_eval = DeepQNetwork(
                 lr,
-                nbr_actions=self.nbr_actions,
                 input_dims=input_dims,
-                fc1_dims=256,
-                fc2_dims=256, fc3_dims=64)
+                fc1_dims=256, fc2_dims=256, fc3_dims=64,
+                nbr_actions=self.nbr_actions
+        )
         self.state_memory = np.zeros((self.mem_size, *input_dims))
         self.new_state_memory = np.zeros((self.mem_size, *input_dims))
         self.action_memory = np.zeros((self.mem_size, self.nbr_actions),
@@ -99,7 +100,8 @@ class Agent(object):
             reward_batch = T.Tensor(reward_batch).to(self.Q_eval.device)
             terminal_batch = T.Tensor(terminal_batch).to(self.Q_eval.device)
 
-            q_eval = self.Q_eval.feed_forward(state_batch).to(self.Q_eval.device)
+            q_eval = self.Q_eval.feed_forward(
+                state_batch).to(self.Q_eval.device)
             q_target = q_eval.clone()
             q_next = self.Q_eval.feed_forward(
                     new_state_batch).to(self.Q_eval.device)
@@ -114,3 +116,14 @@ class Agent(object):
             loss = self.Q_eval.loss(q_target, q_eval).to(self.Q_eval.device)
             loss.backward()
             self.Q_eval.optimizer.step()
+
+    def CheckPoint(self, episode, filepath):
+        '''Save the current state of the model in a pickled file '''
+
+        state = {
+            'episode': episode,
+            'state': self.Q_eval.state_dict(),
+            'optimizer': self.Q_eval.optimizer.state_dict()
+        }
+
+        T.save(state, filepath)

@@ -1,19 +1,20 @@
 # TODO
-x (A) 2020-03-01 +RLTrafficSignalControl Find how to generate realistic demand for the Sheppard_Meadowvale Simulation @sumocfg @sumoWrapper
-(A) 2020-02-27 +RLTrafficSignalControl Implement Reward and Observations for ProgramAgent @sumoWrapper @agents
-(A) 2020-02-27 +RLTrafficSignalControl Generate realistic route file exhausting all traffic conditions @sumoWrapper
-(A) 2020-02-27 +RLTrafficSignalControl Implement check-pointing of trained models @RL_ModelImplementations @main_Training
-(B) 2020-02-27 +RLTrafficSignalControl Leverage RamDisk Capabilities to speed-up interactions with XML files @main_Training
-(B) 2020-02-27 +RLTrafficSignalControl Try different NeuNet Architectures @RL_ModelImplementations
-(C) 2020-02-27 +RLTrafficSignalControl Implement Network Agent Helper Code @sumoWrapper @agents
-(C) 2020-02-27 +RLTrafficSignalControl Explore parallel training @main_Training.py @RL_ModelImplementations
-(C) 2020-02-27 +RLTrafficSignalControl Re-factor Reward, Observation & Simulation Logic @sumoWrapper
-(C) 2020-03-01 +RLTrafficSignalControl Explore the possibility to do inference on live data @main_Training
-(C) 2020-03-01 +RLTrafficSignalControl Add logic to handle switch between training and inference modes @main_Training
+# done? priority due_date created_date description
+(A) 2020-03-04 Convert back and forth from SUMo Intersections to Simulation Ideal intersections +RLTrafficSignalControl 
+(A) 2020-02-27 Implement Reward and Observations for ProgramAgent @sumoWrapper @agents +RLTrafficSignalControl 
+(B) 2020-03-10 2020-03-01 Find how to generate realistic demand for the Sheppard_Meadowvale Simulation @sumocfg @sumoWrapper +RLTrafficSignalControl 
+(B) 2020-02-27 Leverage RamDisk Capabilities to speed-up interactions with XML files @main_Training +RLTrafficSignalControl 
+(B) 2020-02-27 Try different NeuNet Architectures @RL_ModelImplementations +RLTrafficSignalControl 
+(C) 2020-02-27 Generate realistic route file exhausting all traffic conditions @sumoWrapper +RLTrafficSignalControl 
+(C) 2020-02-27 Implement Network Agent Helper Code @sumoWrapper @agents +RLTrafficSignalControl 
+(C) 2020-02-27 Explore parallel training @main_Training.py @RL_ModelImplementations +RLTrafficSignalControl 
+(C) 2020-02-27 Re-factor Reward, Observation & Simulation Logic @sumoWrapper +RLTrafficSignalControl 
+(C) 2020-03-01 Explore the possibility to do inference on live data @main_Training +RLTrafficSignalControl 
+(C) 2020-03-01 Add logic to handle switch between training and inference modes @main_Training +RLTrafficSignalControl 
 
 # DONE
-x (A) 2020-03-01 2020-02-27 +RLTrafficSignalControl Import OpenStreetMap (Sheppard & MeadowVale Pilot area) into SUMo @sumocfg
-x (A) 2020-03-03 2020-02-27 +RLTrafficSignalControl Implement continuous training @sumoWrapper
-x (C) 2020-03-03 2020-02-27 +RLTrafficSignalControl Implement arguments parsing logic
-x (B) 2020-02-27 +RLTrafficSignalControl Suppress all outputs from SUMo & TraCI @sumoWrapper
-
+x (A) 2020-03-01 2020-02-27 Import OpenStreetMap (Sheppard & MeadowVale Pilot area) into SUMo @sumocfg +RLTrafficSignalControl 
+x (A) 2020-03-03 2020-02-27 Implement continuous training @sumoWrapper +RLTrafficSignalControl 
+x (C) 2020-03-03 2020-02-27 Implement arguments parsing logic +RLTrafficSignalControl 
+x (B) 2020-02-27 Suppress all outputs from SUMo & TraCI @sumoWrapper +RLTrafficSignalControl 
+x (A) 2020-02-27 Implement check-pointing of trained models @RL_ModelImplementations @main_Training +RLTrafficSignalControl 

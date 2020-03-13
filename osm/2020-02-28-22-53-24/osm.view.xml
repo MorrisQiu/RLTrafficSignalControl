@@ -1,0 +1,14 @@
+
+<viewsettings>
+    <scheme name="real world"/>
+    <delay value="20"/>
+    <viewport zoom="130" x="2930.63" y="1769.29"/>
+    <decal file="tile4586_5969.jpeg" centerX="374.70784605829976" centerY="2487.806112265447" width="1804.86718762503" height="1723.1161285601556" layer="0"/>
+    <decal file="tile4586_5970.jpeg" centerX="412.54373996006325" centerY="778.2750000000001" width="1805.3342309934087" height="1723.5801275279373" layer="0"/>
+    <decal file="tile4587_5969.jpeg" centerX="2141.9730988445226" centerY="2487.806112265447" width="1805.3361087383237" height="1722.6473636273295" layer="0"/>
+    <decal file="tile4587_5970.jpeg" centerX="2180.277007234632" centerY="778.2750000000001" width="1805.8031523372047" height="1723.1113853882998" layer="0"/>
+    <decal file="tile4588_5969.jpeg" centerX="3909.239263614407" centerY="2487.806112265447" width="1805.8050527221058" height="1722.1785974409431" layer="0"/>
+    <decal file="tile4588_5970.jpeg" centerX="3948.0111985562835" centerY="778.2750000000001" width="1806.272096708184" height="1722.6426421348006" layer="0"/>
+    <decal file="tile4589_5969.jpeg" centerX="5676.506351246731" centerY="2487.806112265447" width="1806.274019710254" height="1721.7098298445344" layer="0"/>
+    <decal file="tile4589_5970.jpeg" centerX="5715.746324950946" centerY="778.2750000000001" width="1806.7410642399918" height="1722.1738976091146" layer="0"/>
+</viewsettings>

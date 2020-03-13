@@ -1,4 +1,5 @@
 import gym
+from datetime import datetime as dt
 import argparse
 import envs  # noqa: w0611
 from RL_ModelImplementations import Agent
@@ -64,12 +65,14 @@ if __name__ == '__main__':
     for i in range(NBR_GAMES):
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i-10):(i+1)])
+            brain.CheckPoint(
+                i,
+                str(round(dt.today().timestamp())) + '_duration_model.pickle'
+                    )
             print('episode', i, ' score', score,
                   'average score %.3f' % avg_score,
                   'epsilon %.3f' % brain.epsilon)
         else:
-            print("\033[F")
-            print("\033[F")
             print('episode', i, ' score', score)
         eps_history.append(brain.epsilon)
         done = False
