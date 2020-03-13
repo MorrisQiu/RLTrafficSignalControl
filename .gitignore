@@ -1,1 +1,14 @@
-/__pycache__/
+**/__pycache__/
+.ipynb_checkpoints/
+data/
+discarded/
+envs/sumoEnvironements.egg-info/
+envs/sumo_envs/nohup.out
+envs/sumo_envs/test_save_state.xml
+envs/sumo_envs/tripinfo.xml
+errors.xml
+flow/
+messages.xml
+tags
+test_save_state.xml
+tripinfo.xml
