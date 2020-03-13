@@ -9,7 +9,7 @@
         <node-files value="road.nod.xml"/>
         <edge-files value="road.edg.xml"/>
         <connection-files value="road.con.xml"/>
-		<type-file value="road.typ.xml"/>
+	      <type-file value="road.typ.xml"/>
         <additional-file value="e2.add.xml"/>
     </input>
 

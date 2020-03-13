@@ -18,6 +18,7 @@ from main_Training import (
 from helper import state_to_array
 
 
+
 # Import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -55,9 +56,9 @@ def generate_routefile(route_file):
     with open(route_file, "w") as routes:
         print("""<routes>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" \
-              minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
+              minGap="2.5" maxSpeed="16.67" guiShape="passenger/wagon"/>
         <vType id="typeNS" accel="0.8" decel="4.5" sigma="0.5" length="7" \
-              minGap="3" maxSpeed="25" guiShape="bus"/>
+              minGap="3" maxSpeed="25" guiShape="passenger/van"/>
 
         <route id="EastBound" edges="W-0W 0W-0 0-0E 0E-E" />
         <route id="WestBound" edges="E-0E 0E-0 0-0W 0W-W" />
@@ -161,7 +162,7 @@ class Env_TLC:
         self.last_state['OBVolume'] = [Ln.getLastStepVehicleNumber(
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBMeanSpeed'] = [Ln.getLastStepMeanSpeed(
-            laneID) for laneID in self.IBlaneList]
+            laneID) for laneID in self.OBlaneList]
         self.last_state['OBQueuSize'] = [Ln.getLastStepHaltingNumber(
             laneID) for laneID in self.OBlaneList]
         self.last_state['OBWaitingTime'] = [Ln.getWaitingTime(
